@@ -1,8 +1,22 @@
 application: airport-board
 version: 1
-runtime: python
+runtime: python27
 api_version: 1
+threadsafe: true
+
+libraries:
+- name: django
+  version: "1.3"
 
 handlers:
+- url: /css
+  static_dir: css
+
+- url: /fonts
+  static_dir: fonts
+
+- url: /js
+  static_dir: js
+
 - url: /.*
-  script: helloworld.py
+  script: main.app
