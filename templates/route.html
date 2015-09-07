@@ -23,54 +23,47 @@
 </head>
 
 <body>
-	<header>
-		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-			<div class="container">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle collapsed"
-						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-						aria-controls="navbar">
-						<span class="sr-only">Toggle navigation</span> <span
-							class="icon-bar"></span> <span class="icon-bar"></span> <span
-							class="icon-bar"></span>
-					</button>
-					<a class="navbar-brand" href="">Site Home</a>
-				</div>
-				<div id="navbar" class="collapse navbar-collapse">
-					<ul class="nav navbar-nav">
-						<li><a href="/regi">Register</a></li>
-						<li><a href="#contact">Contact</a></li>
-					</ul>
-					<ul class="dropdown-menu">
-						<li><a href="#">Action</a></li>
-						<li><a href="#">Another action</a></li>
-						<li><a href="#">Something else here</a></li>
-						<li role="separator" class="divider"></li>
-						<li class="dropdown-header">Nav header</li>
-						<li><a href="#">Separated link</a></li>
-						<li><a href="#">One more separated link</a></li>
-					</ul>
-				</div>
-				<!--/.nav-collapse -->
-			</div>
-		</nav>
-	</header>
+{{ header }}
 
 	<div class="container">
-		<div class="page-header">
-			<h1>システムメッセージ</h1>
+		{% if remode == 1 %}
+		<div class="alert alert-success">
 			<p>{{ sys_message }}</p>
 		</div>
-		<h2 class="sub-header">Section title</h2>
+		{% endif %}
+		<h2 class="sub-header">空路登録</h2>
 		<div class="panel panel-primary">
-			<form method="post" action="/regi">
-				<label>メールアドレス</label><input type="text" name="email">
-				<label>パスワード</label><input type="password" name="password">
-				<input type="submit">
+			<form method="post" action="/Route">
+			<label>出発空港</label>
+			<select name="departure" id="departure">
+			{% for airport in allports %}
+			<option>
+			{{ airport.portname }}
+			</option>
+			{% endfor %}
+			</optgroup>
+			</select>
+			<label>到着空港</label>
+			<select name="arrival" id="arrival">
+			{% for airport in allports %}
+			<option>
+			{{ airport.portname }}
+			</option>
+			{% endfor %}
+			</select>
+			<label>航空会社</label>
+			<select name="airline" id="airline">
+			{% for airline in allcompanies %}
+			<option>
+			{{ airline.company_name }}
+			</option>
+			{% endfor %}
+			</select>
+			<label>路線コード</label><input type="text" name="code">
+			<input type="submit">
 			</form>
 		</div>
 	</div>
-
 	<!-- /.container -->
 
 

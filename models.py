@@ -17,5 +17,7 @@ class airline(db.Model):
 
 class air_route(db.Model):
     route_code = db.StringProperty(multiline=False)
-    airports = db.ListProperty
-    airline  = db.ListProperty
+    depart_port = db.StringProperty(multiline=False)
+    arrival_port= db.StringProperty(multiline=False)
+    airports = db.ListProperty(item_type=str)
+    airline  = db.ListProperty(item_type=str)
