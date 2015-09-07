@@ -18,14 +18,31 @@ class MainPage(webapp2.RequestHandler):
 
 class Airline(webapp2.RequestHandler):
     def get(self):
-        newline = models.airline()
-        newline.company_name = "ノイエクルスエアライン"
-        newline.company_abb = "LAN"
-        newline.put()
-        self.redirect('/')
+
+        template_values = {'sys_message':"航空会社を登録してください"}
+        path = os.path.join(os.path.dirname(__file__), './templates/Airline.html')
+        self.response.out.write(template.render(path, template_values))
         return
 
     def post(self):
+
+        try:
+            newline = models.airline()
+            newline.company_name = self.request.get("company_name")
+            newline.company_abb = self.request.get("company_abb")
+            newline.origin_country = self.request.get("country")
+            newline.put()
+            msg = "航空会社登録完了"
+
+        except ValueError:
+            msg = "例外エラー発生"
+
+        finally:
+            allports = models.airport.all()
+            template_values = {'sys_message':msg,
+                               'allports': allports}
+            path = os.path.join(os.path.dirname(__file__), './templates/index.html')
+            self.response.out.write(template.render(path, template_values))
 
         return
 
@@ -50,7 +67,9 @@ class Airport(webapp2.RequestHandler):
             msg = "例外エラー発生"
 
         finally:
-            template_values = {'sys_message':msg}
+            allports = models.airport.all()
+            template_values = {'sys_message':msg,
+                               'allports': allports}
             path = os.path.join(os.path.dirname(__file__), './templates/index.html')
             self.response.out.write(template.render(path, template_values))
 
