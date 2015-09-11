@@ -21,3 +21,11 @@ class air_route(db.Model):
     arrival_port= db.StringProperty(multiline=False)
     airports = db.ListProperty(item_type=str)
     airline  = db.ListProperty(item_type=str)
+
+class user(db.Model):
+    email = db.EmailProperty()
+    password = db.StringProperty(multiline=False)
+    country_key = db.StringProperty(multiline=False)
+
+class country(db.Model):
+    country_name = db.StringProperty(multiline=False)

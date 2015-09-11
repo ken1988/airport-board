@@ -13,19 +13,23 @@
 				</div>
 				<div id="navbar" class="collapse navbar-collapse">
 					<ul class="nav navbar-nav">
+					{% if login == 1 %}
 						<li><a href="/Airport">空港登録</a></li>
 						<li><a href="/Airline">航空会社登録</a></li>
 						<li><a href="/Route">空路登録</a></li>
 					</ul>
-					<ul class="dropdown-menu">
-						<li><a href="#">Action</a></li>
-						<li><a href="#">Another action</a></li>
-						<li><a href="#">Something else here</a></li>
-						<li role="separator" class="divider"></li>
-						<li class="dropdown-header">Nav header</li>
-						<li><a href="#">Separated link</a></li>
-						<li><a href="#">One more separated link</a></li>
+					{{ email }}
+					{% else %}
+						<li><a href="/User">ユーザ登録</a></li>
 					</ul>
+					<form class="navbar-form" method="post" action="/Signin">
+						<div class="form-group">
+							<input type="text" name="userID" placeholder="メールアドレス">
+							<input type="password" name="password" placeholder="パスワード">
+						</div>
+						<input type="submit" class="btn btn-info">
+						</form>
+					{% endif %}
 				</div>
 				<!--/.nav-collapse -->
 			</div>
