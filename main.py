@@ -13,12 +13,19 @@ from google.appengine.ext.webapp import template
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
-
         allports = models.airport.all()
         allroutes = models.air_route.all()
 
         #メインページ表示
-        template_values = Signin.chk_cookie()
+        client_id = self.request.cookies.get('clid', '')
+        if client_id == '':
+            template_values = {}
+
+        else:
+            disp_mail = self.request.cookies.get('email', '')
+            template_values = {'login':1,
+                               'email':disp_mail}
+
         path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
         header_html = template.render(path,template_values)
 
@@ -30,7 +37,9 @@ class MainPage(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
     def post(self):
-        template_values = Signin.chk_cookie()
+        disp_mail = self.request.cookies.get('email', '')
+        template_values = {'login':1,
+                           'email':disp_mail}
         path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
         header_html = template.render(path,template_values)
 
@@ -49,133 +58,133 @@ class MainPage(webapp2.RequestHandler):
 
         return
 
-class Airline(webapp2.RequestHandler):
+class registration_page():
+    def setval(self):
+        res= {}
+        res['disp_link'] = ''
+        res['msg'] = ''
+        res['rescd'] = 2
+        res['airport'] = ''
+        res['airline'] = ''
+        return res
+
     def get(self):
-        template_values = Signin.chk_cookie()
-        path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
+        res = self.setval()
+        self.display(res)
+
+    def display(self,res):
+        header_link = './templates/header_menu.html'
+        client_id = self.request.cookies.get('clid', '')
+        if client_id == '':
+            self.redirect('/')
+        else:
+            disp_mail = self.request.cookies.get('email', '')
+            template_values = {'login':1,
+                               'email':disp_mail}
+        path = os.path.join(os.path.dirname(__file__), header_link)
         header_html = template.render(path,template_values)
 
-        template_values = {'sys_message':"航空会社を登録してください",
-                           'header':header_html}
-        path = os.path.join(os.path.dirname(__file__), './templates/Airline.html')
+        template_values = {'sys_message':res['msg'],
+                           'header':header_html,
+                           'remode':res['rescd'],
+                           'airline':res['airline'],
+                           'airport':res['airport']}
+        path = os.path.join(os.path.dirname(__file__),res['disp_link'])
         self.response.out.write(template.render(path, template_values))
-        return
+
+
+class Airline(webapp2.RequestHandler,registration_page):
+    def setval(self):
+        res= {}
+        res['disp_link'] = './templates/Airline.html'
+        res['msg'] = '航空会社を登録してください'
+        res['rescd'] = 2
+        return res
 
     def post(self):
-        try:
-            newline = models.airline()
-            newline.company_name = self.request.get("company_name")
-            newline.company_abb = self.request.get("company_abb")
-            newline.origin_country = self.request.get("country")
+        arg = {'companyname':self.request.get("company_name"),
+               'companyabb':self.request.get("company_abb"),
+               'country':self.request.get("country")}
+        newline = models.airline()
+        rescd = newline.create(arg)
+
+        if rescd == 0:
             newline.put()
-            msg = "航空会社登録完了"
-            remode = 1
+            msg ='登録完了'
+        else:
+            msg ='エラーが発生しました'
 
-        except ValueError:
-            msg = "例外エラー発生"
-
-        finally:
-            template_values = Signin.chk_cookie()
-            path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
-            header_html = template.render(path,template_values)
-
-            template_values = {'sys_message':msg,
-                               'header':header_html,
-                               'remode': remode}
-            path = os.path.join(os.path.dirname(__file__), './templates/Airline.html')
-            self.response.out.write(template.render(path, template_values))
-
+        res = self.setval()
+        self.display(res['disp_link'],msg,rescd)
         return
 
-class Airport(webapp2.RequestHandler):
-    def get(self):
-        template_values = Signin.chk_cookie()
-        path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
-        header_html = template.render(path,template_values)
-
-        template_values = {'sys_message':"航空会社を登録してください",
-                           'header':header_html}
-        path = os.path.join(os.path.dirname(__file__), './templates/Airport.html')
-        self.response.out.write(template.render(path, template_values))
-        return
+class Airport(webapp2.RequestHandler,registration_page):
+    def setval(self):
+        res= {}
+        res['disp_link'] = './templates/Airport.html'
+        res['msg'] = '空港を登録してください'
+        res['rescd'] = 2
+        return res
 
     def post(self):
+        arg = {'portname': self.request.get("portname"),
+               'location': self.request.get("location")}
+        newport = models.airport()
+        rescd = newport.create(arg)
 
-        try:
-            newport = models.airport()
-            newport.portname = self.request.get("portname")
-            newport.location = self.request.get("location")
+        if rescd == 0:
             newport.put()
-            msg = "空港登録完了"
-            remode = 1
+            msg ='登録完了'
+        else:
+            msg ='エラーが発生しました'
 
-        except ValueError:
-            msg = "例外エラー発生"
-
-        finally:
-            template_values = Signin.chk_cookie()
-            path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
-            header_html = template.render(path,template_values)
-
-            template_values = {'sys_message':msg,
-                               'header':header_html,
-                               'remode': remode}
-            path = os.path.join(os.path.dirname(__file__), './templates/Airport.html')
-            self.response.out.write(template.render(path, template_values))
+        res = self.setval()
+        self.display(res['disp_link'],msg,rescd)
         return
 
-class Route(webapp2.RequestHandler):
-    def get(self):
-        template_values = Signin.chk_cookie()
-        path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
-        header_html = template.render(path,template_values)
+class Route(webapp2.RequestHandler,registration_page):
+    def setval(self):
+        res= {}
+        res['disp_link'] = './templates/route.html'
+        res['msg'] = '空路を設定してください'
+        res['rescd'] = 2
 
         allports = models.airport.all()
-        allcompanies = models.airline.all()
-
-        template_values = {'sys_message':"空路を設定してください",
-                           'header':header_html,
-                           'allports':allports,
-                           'allcompanies':allcompanies}
-        path = os.path.join(os.path.dirname(__file__), './templates/route.html')
-        self.response.out.write(template.render(path, template_values))
+        alllines = models.airline.all()
+        res['airport'] = allports
+        res['airline'] = alllines
+        return res
 
     def post(self):
+        arg = {'departure':self.request.get("departure"),
+                'arrival': self.request.get("arrival"),
+                'airline': self.request.get("airline"),
+                'code'   : self.request.get("code")}
 
-        try:
-            newroute = models.air_route()
-            newroute.depart_port = self.request.get("departure")
-            newroute.arrival_port = self.request.get("arrival")
-            newroute.airports = [self.request.get("departure"),self.request.get("arrival")]
-            newroute.airline = [self.request.get("airline")]
-            newroute.route_code = self.request.get("code")
+        newroute = models.air_route()
+        rescd = newroute.create(arg)
+
+        if rescd == 0:
             newroute.put()
-            msg = "空路登録完了"
-            remode = 1
+            msg ='登録完了'
+        else:
+            msg ='エラーが発生しました'
 
-        except ValueError:
-            msg = "例外エラー発生"
-
-        finally:
-            allports = models.airport.all()
-            allcompanies = models.airline.all()
-
-            template_values = Signin.chk_cookie()
-            path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
-            header_html = template.render(path,template_values)
-
-            template_values = {'sys_message':msg,
-                               'header':header_html,
-                               'allports':allports,
-                               'allcompanies':allcompanies,
-                               'remode': remode}
-            path = os.path.join(os.path.dirname(__file__), './templates/route.html')
-            self.response.out.write(template.render(path, template_values))
+        res = self.setval()
+        self.display(res['disp_link'],msg,rescd)
         return
 
 class User(webapp2.RequestHandler):
     def get(self):
-        template_values = Signin.chk_cookie()
+        client_id = self.request.cookies.get('clid', '')
+        if client_id == '':
+            template_values = {}
+
+        else:
+            disp_mail = self.request.cookies.get('email', '')
+            template_values = {'login':1,
+                               'email':disp_mail}
+
         path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
         header_html = template.render(path,template_values)
 
@@ -246,16 +255,6 @@ class Signin(webapp2.RequestHandler):
         self.redirect('/')
         return
 
-    def chk_cookie(self):
-        client_id = self.request.cookies.get('clid', '')
-        if client_id == '':
-            template_values = {}
-
-        else:
-            disp_mail = self.request.cookies.get('email', '')
-            template_values = {'login':1,
-                               'email':disp_mail}
-        return template_values
 
     def put_cookie(self,param_list):
         client_id = self.request.cookies.get('clid', '')
