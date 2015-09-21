@@ -51,7 +51,7 @@
 					<tr>
 						<td>15:00</td>
 						<td>{{ air_route.airports.1 }}</td>
-						<td>{{ air_route.airline.0 }}</td>
+						<td><img src="/get_img?key={{ air_route.airline.0 }}" />{{ air_route.str_airline.0 }}</td>
 						<td>{{ air_route.route_code }}</td>
 					</tr>
 					{% endfor %}

@@ -22,7 +22,7 @@ class airport(db.Model):
 class airline(db.Model):
     company_name = db.StringProperty(multiline=False)
     company_abb  = db.StringProperty(multiline=False)
-    company_logo = db.LinkProperty
+    company_logo = db.BlobProperty()
     origin_country = db.StringProperty(multiline=False)
 
     def create(self,arg):
@@ -30,6 +30,8 @@ class airline(db.Model):
             self.company_name = arg['companyname']
             self.company_abb = arg['companyabb']
             self.origin_country = arg['country']
+            self.company_logo = arg['company_logo']
+
             rescd = 0
         except ValueError:
             rescd = 1
@@ -42,12 +44,14 @@ class air_route(db.Model):
     arrival_port= db.StringProperty(multiline=False)
     airports  = db.ListProperty(item_type=str)
     airline  = db.ListProperty(item_type=str)
+    str_airline = db.ListProperty(item_type=str)
     def create(self,arg):
         try:
             self.depart_port = arg['departure']
             self.arrival_port = arg['arrival']
             self.airports = [arg['departure'],arg['arrival']]
             self.airline = [arg['airline']]
+            self.str_airline = [arg['str_airline']]
             self.route_code = arg['code']
             rescd = 0
         except ValueError:

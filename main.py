@@ -9,13 +9,14 @@ import models
 import uuid
 import Cookie
 import hashlib
+from datetime import datetime
 from google.appengine.ext.webapp import template
+from google.appengine.ext import db
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
         allports = models.airport.all()
         allroutes = models.air_route.all()
-
         #メインページ表示
         client_id = self.request.cookies.get('clid', '')
         if client_id == '':
@@ -57,6 +58,16 @@ class MainPage(webapp2.RequestHandler):
         self.response.out.write(template.render(path, template_values))
 
         return
+class Get_image(webapp2.RequestHandler):
+    def get(self):
+        try:
+            tar_comp = models.airline.get_by_key_name((self.request.get('key')))
+
+            self.response.headers['Content-Type'] = 'image/png'
+            self.response.out.write(tar_comp.company_logo)
+        except:
+            self.response.out.write('No Image')
+        return
 
 class registration_page():
     def setval(self):
@@ -87,8 +98,8 @@ class registration_page():
         template_values = {'sys_message':res['msg'],
                            'header':header_html,
                            'remode':res['rescd'],
-                           'airline':res['airline'],
-                           'airport':res['airport']}
+                           'allcompanies':res['airline'],
+                           'allports':res['airport']}
         path = os.path.join(os.path.dirname(__file__),res['disp_link'])
         self.response.out.write(template.render(path, template_values))
 
@@ -99,13 +110,22 @@ class Airline(webapp2.RequestHandler,registration_page):
         res['disp_link'] = './templates/Airline.html'
         res['msg'] = '航空会社を登録してください'
         res['rescd'] = 2
+        res['airport'] = ''
+        res['airline'] = ''
         return res
 
     def post(self):
         arg = {'companyname':self.request.get("company_name"),
                'companyabb':self.request.get("company_abb"),
-               'country':self.request.get("country")}
-        newline = models.airline()
+               'country':self.request.get("country"),
+               'company_logo':self.request.get("file_data")}
+
+        abb = self.request.get("company_abb")
+        ndate = datetime.now()
+        str_t=ndate.strftime('%Y%m%d')
+        abbs = str(abb) + str_t
+
+        newline = models.airline(key_name = abbs)
         rescd = newline.create(arg)
 
         if rescd == 0:
@@ -115,7 +135,9 @@ class Airline(webapp2.RequestHandler,registration_page):
             msg ='エラーが発生しました'
 
         res = self.setval()
-        self.display(res['disp_link'],msg,rescd)
+        res['rescd'] = rescd
+        res['msg'] = msg
+        self.display(res)
         return
 
 class Airport(webapp2.RequestHandler,registration_page):
@@ -124,6 +146,8 @@ class Airport(webapp2.RequestHandler,registration_page):
         res['disp_link'] = './templates/Airport.html'
         res['msg'] = '空港を登録してください'
         res['rescd'] = 2
+        res['airport'] = ''
+        res['airline'] = ''
         return res
 
     def post(self):
@@ -139,7 +163,9 @@ class Airport(webapp2.RequestHandler,registration_page):
             msg ='エラーが発生しました'
 
         res = self.setval()
-        self.display(res['disp_link'],msg,rescd)
+        res['rescd'] = rescd
+        res['msg'] = msg
+        self.display(res)
         return
 
 class Route(webapp2.RequestHandler,registration_page):
@@ -151,14 +177,20 @@ class Route(webapp2.RequestHandler,registration_page):
 
         allports = models.airport.all()
         alllines = models.airline.all()
+
         res['airport'] = allports
         res['airline'] = alllines
+
         return res
 
     def post(self):
+        str_airline = models.airline.get_by_key_name(self.request.get("airline")).company_name
+
+
         arg = {'departure':self.request.get("departure"),
                 'arrival': self.request.get("arrival"),
                 'airline': self.request.get("airline"),
+                'str_airline':str_airline,
                 'code'   : self.request.get("code")}
 
         newroute = models.air_route()
@@ -171,7 +203,9 @@ class Route(webapp2.RequestHandler,registration_page):
             msg ='エラーが発生しました'
 
         res = self.setval()
-        self.display(res['disp_link'],msg,rescd)
+        res['rescd'] = rescd
+        res['msg'] = msg
+        self.display(res)
         return
 
 class User(webapp2.RequestHandler):
@@ -274,4 +308,5 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/Airport', Airport),
                                ('/Route', Route),
                                ('/User', User),
-                               ('/Signin', Signin)], debug=True)
+                               ('/Signin', Signin),
+                               ('/get_img',Get_image)], debug=True)

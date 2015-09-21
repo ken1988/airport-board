@@ -30,11 +30,11 @@
 		<div class="alert alert-success">
 		<p>{{ sys_message }}</p>
 		</div>
-		{% elseif remode == 1  %}
+		{% endif %}
+		{% if remode == 1  %}
 		<div class="alert alert-danger">
 		<p>{{ sys_message }}</p>
 		</div>
-		{% else %}
 		{% endif %}
 		<h2 class="sub-header">Section title</h2>
 		<div class="panel panel-primary">

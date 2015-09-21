@@ -54,7 +54,7 @@
 			<label>航空会社</label>
 			<select name="airline" id="airline">
 			{% for airline in allcompanies %}
-			<option>
+			<option value="{{ airline.key.name }}">
 			{{ airline.company_name }}
 			</option>
 			{% endfor %}

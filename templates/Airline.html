@@ -32,8 +32,9 @@
 		</div>
 		<h2 class="sub-header">Section title</h2>
 		<div class="panel panel-primary">
-			<form method="post" action="/Airline">
+			<form method="post" enctype="multipart/form-data" action="/Airline" role="form">
 				<label>航空会社名</label><input type="text" name="company_name"><br>
+				<label>会社ロゴ<input id="logofile" name="file_data" type="file"><br>
 				<label>略号</label><input type="text" name="company_abb"><br>
 				<label>所属国</label><input type="text" name="country">
 				<input type="submit">
