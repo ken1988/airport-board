@@ -36,11 +36,13 @@
 		<p>{{ sys_message }}</p>
 		</div>
 		{% endif %}
-		<h2 class="sub-header">Section title</h2>
+		<h2 class="sub-header">空港登録</h2>
 		<div class="panel panel-primary">
 			<form method="post" action="/Airport">
 				<label>空港名</label><input type="text" name="portname"><br>
 				<label>所属国</label><input type="text" name="location">
+				<label>滑走路数</label>
+				<span>推定年間発着数</span>
 				<input type="submit">
 			</form>
 		</div>

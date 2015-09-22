@@ -14,10 +14,39 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 
 class MainPage(webapp2.RequestHandler):
-    def get(self):
+    def initial_set(self,depart_port):
+        if depart_port == '':
+            depart_port = "フリータウン空港"
+
         allports = models.airport.all()
-        allroutes = models.air_route.all()
+        q = models.air_route.all()
+        allroutes = q.filter("depart_port =", depart_port)
+        res = {"dept"     :depart_port,
+               "allports" :allports,
+               "allroutes": allroutes}
+
+        return res
+
+    def get(self):
         #メインページ表示
+        self.display()
+
+    def post(self):
+        self.display()
+
+    def display(self):
+        header_html = self.get_header()
+        res = self.initial_set(self.request.get("airport"))
+
+        template_values = {'sys_message':"メッセージはありません",
+                           'header':header_html,
+                           'depart_port':res["dept"],
+                           'allports': res["allports"],
+                           'allroutes':res["allroutes"]}
+        path = os.path.join(os.path.dirname(__file__), './templates/index.html')
+        self.response.out.write(template.render(path, template_values))
+
+    def get_header(self):
         client_id = self.request.cookies.get('clid', '')
         if client_id == '':
             template_values = {}
@@ -33,34 +62,8 @@ class MainPage(webapp2.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
         header_html = template.render(path,template_values)
 
-        template_values = {'sys_message':"メッセージはありません",
-                           'header':header_html,
-                           'allports': allports,
-                           'allroutes':allroutes}
-        path = os.path.join(os.path.dirname(__file__), './templates/index.html')
-        self.response.out.write(template.render(path, template_values))
+        return header_html
 
-    def post(self):
-        disp_mail = self.request.cookies.get('email', '')
-        template_values = {'login':1,
-                           'email':disp_mail}
-        path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
-        header_html = template.render(path,template_values)
-
-        depart_port = self.request.get("airport")
-        allports = models.airport.all()
-        q = models.air_route.all()
-        allroutes = q.filter("depart_port =", depart_port)
-
-        template_values = {'sys_message':"メッセージはありません",
-                           'header':header_html,
-                           'depart_port':depart_port,
-                           'allports': allports,
-                           'allroutes':allroutes}
-        path = os.path.join(os.path.dirname(__file__), './templates/index.html')
-        self.response.out.write(template.render(path, template_values))
-
-        return
 class Get_image(webapp2.RequestHandler):
     def get(self):
         try:
@@ -269,7 +272,9 @@ class User(webapp2.RequestHandler):
 
 class Signin(webapp2.RequestHandler):
     def get(self):
-        #メインページに戻す
+        #cookieを破棄する
+        self.response.delete_cookie('clid')
+        self.response.delete_cookie('hash')
         self.redirect('/')
         return
 
@@ -293,14 +298,15 @@ class Signin(webapp2.RequestHandler):
             if pr_user.password == passwd:
 
                 client_id = str(uuid.uuid4())
-                pr_list = {'clid':client_id,'mail':pr_user.email,'hash':user_key}
-                self.put_cookie(pr_list)
+                max_age = 60*120
+                pr_list = {'clid':client_id,'hash':user_key}
+                self.put_cookie(pr_list,max_age)
 
         self.redirect('/')
         return
 
 
-    def put_cookie(self,param_list):
+    def put_cookie(self,param_list,max_age):
         client_id = self.request.cookies.get('clid', '')
         if client_id == '':
             for key,value in param_list.iteritems():
@@ -309,7 +315,7 @@ class Signin(webapp2.RequestHandler):
                 myCookie = Cookie.SimpleCookie(os.environ.get( 'HTTP_COOKIE', '' ))
                 myCookie[keys] = values
                 myCookie[keys]["path"] = "/"
-                myCookie[keys]["max-age"] = 60*120
+                myCookie[keys]["max-age"] = max_age
                 self.response.headers.add_header('Set-Cookie', myCookie.output(header=""))
         return
 

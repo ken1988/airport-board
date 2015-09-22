@@ -32,38 +32,40 @@
 		</div>
 		{% endif %}
 		<h2 class="sub-header">空路登録</h2>
-		<div class="panel panel-primary">
+		<div class="panel panel-primary  col-lg-3 col-md-3">
 			<form method="post" action="/Route">
 			<label>出発空港</label>
-			<select name="departure" id="departure">
+			<select name="departure" id="departure" class="form-control">
 			{% for airport in allports %}
 			<option>
 			{{ airport.portname }}
 			</option>
 			{% endfor %}
-			</optgroup>
-			</select><br/>
+			</select>
 			<label>到着空港</label>
-			<select name="arrival" id="arrival">
+			<select name="arrival" id="arrival" class="form-control">
 			{% for airport in allports %}
 			<option>
 			{{ airport.portname }}
 			</option>
 			{% endfor %}
-			</select><br/>
-			<label>所要時間</label><input type="text" name="dist">時間<br/>
+			</select>
+			<label>所要時間</label>
+			<div class="input-group col-xs-6"><input type="text" name="dist" class="form-control"><span class="input-group-addon">時間</span></div>
+			<label>頻度</label>
+			<div class="input-group  col-xs-6"><span class="input-group-addon">1日</span><input type="text" name="frec" size="3" class="form-control"><span class="input-group-addon">本</span></div>
 			<label>航空会社</label>
-			<select name="airline" id="airline">
+			<select name="airline" id="airline" class="form-control">
 			{% for airline in allcompanies %}
 			<option value="{{ airline.key.name }}">
 			{{ airline.company_name }}
 			</option>
 			{% endfor %}
-			</select><br/>
-			<label>路線コード</label><input type="text" name="code"><br/>
-			<label>頻度</label>1日<input type="text" name="frec">本<br/>
-			<label>使用機材</label><input type="text" name="plane"><br/>
-			<input type="submit">
+			</select>
+			<label>路線コード</label>
+			<div class="input-group  col-xs-8"><span class="input-group-addon" id="comp_abb">{{ allcompanies.0.company_abb }}</span><input type="text" name="code" placeholder="路線コード（8桁）" class="form-control"></div>
+			<label>使用機材</label><input type="text" name="plane" class="form-control">
+			<input type="submit" class="btn btn-primary">
 			</form>
 		</div>
 	</div>

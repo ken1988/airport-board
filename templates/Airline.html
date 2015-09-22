@@ -26,11 +26,17 @@
 {{ header }}
 
 	<div class="container">
-		<div class="page-header">
-			<h1>システムメッセージ</h1>
-			<p>{{ sys_message }}</p>
+		{% if remode == 0 %}
+		<div class="alert alert-success">
+		<p>{{ sys_message }}</p>
 		</div>
-		<h2 class="sub-header">Section title</h2>
+		{% endif %}
+		{% if remode == 1  %}
+		<div class="alert alert-danger">
+		<p>{{ sys_message }}</p>
+		</div>
+		{% endif %}
+		<h2 class="sub-header">航空会社登録</h2>
 		<div class="panel panel-primary">
 			<form method="post" enctype="multipart/form-data" action="/Airline" role="form">
 				<label>航空会社名</label><input type="text" name="company_name"><br>
