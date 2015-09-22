@@ -8,6 +8,7 @@ from google.appengine.ext import db
 class airport(db.Model):
     portname = db.StringProperty(multiline=False)
     location = db.StringProperty(multiline=False)
+    location_key =db.StringProperty(multiline=False)
 
     def create(self,arg):
         try:
@@ -24,6 +25,7 @@ class airline(db.Model):
     company_abb  = db.StringProperty(multiline=False)
     company_logo = db.BlobProperty()
     origin_country = db.StringProperty(multiline=False)
+    origin_key = db.StringProperty(multiline=False)
 
     def create(self,arg):
         try:
@@ -45,6 +47,10 @@ class air_route(db.Model):
     airports  = db.ListProperty(item_type=str)
     airline  = db.ListProperty(item_type=str)
     str_airline = db.ListProperty(item_type=str)
+    Numbers = db.IntegerProperty()
+    Distance = db.IntegerProperty()
+    Plane = db.StringProperty(multiline=False)
+
     def create(self,arg):
         try:
             self.depart_port = arg['departure']
@@ -53,9 +59,14 @@ class air_route(db.Model):
             self.airline = [arg['airline']]
             self.str_airline = [arg['str_airline']]
             self.route_code = arg['code']
+            self.Numbers = int(arg['Numbers'])
+            self.Distance = int(arg['Distance'])
+            self.Plane = arg['Plane']
             rescd = 0
-        except ValueError:
+
+        except Exception:
             rescd = 1
+
         finally:
             return rescd
 

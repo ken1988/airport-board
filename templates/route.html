@@ -42,7 +42,7 @@
 			</option>
 			{% endfor %}
 			</optgroup>
-			</select>
+			</select><br/>
 			<label>到着空港</label>
 			<select name="arrival" id="arrival">
 			{% for airport in allports %}
@@ -50,7 +50,8 @@
 			{{ airport.portname }}
 			</option>
 			{% endfor %}
-			</select>
+			</select><br/>
+			<label>所要時間</label><input type="text" name="dist">時間<br/>
 			<label>航空会社</label>
 			<select name="airline" id="airline">
 			{% for airline in allcompanies %}
@@ -58,8 +59,10 @@
 			{{ airline.company_name }}
 			</option>
 			{% endfor %}
-			</select>
-			<label>路線コード</label><input type="text" name="code">
+			</select><br/>
+			<label>路線コード</label><input type="text" name="code"><br/>
+			<label>頻度</label>1日<input type="text" name="frec">本<br/>
+			<label>使用機材</label><input type="text" name="plane"><br/>
 			<input type="submit">
 			</form>
 		</div>

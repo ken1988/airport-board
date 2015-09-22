@@ -23,9 +23,12 @@ class MainPage(webapp2.RequestHandler):
             template_values = {}
 
         else:
-            disp_mail = self.request.cookies.get('email', '')
+            user_hash = self.request.cookies.get('hash', '')
+            user = models.user().get_by_key_name(user_hash, None)
+            country = models.country().get_by_key_name(user.country_key, None)
+
             template_values = {'login':1,
-                               'email':disp_mail}
+                               'email':country.country_name}
 
         path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
         header_html = template.render(path,template_values)
@@ -89,9 +92,13 @@ class registration_page():
         if client_id == '':
             self.redirect('/')
         else:
-            disp_mail = self.request.cookies.get('email', '')
+            user_hash = self.request.cookies.get('hash', '')
+            user = models.user().get_by_key_name(user_hash, None)
+            country = models.country().get_by_key_name(user.country_key, None)
+
             template_values = {'login':1,
-                               'email':disp_mail}
+                               'email':country.country_name}
+
         path = os.path.join(os.path.dirname(__file__), header_link)
         header_html = template.render(path,template_values)
 
@@ -191,7 +198,10 @@ class Route(webapp2.RequestHandler,registration_page):
                 'arrival': self.request.get("arrival"),
                 'airline': self.request.get("airline"),
                 'str_airline':str_airline,
-                'code'   : self.request.get("code")}
+                'code'   : self.request.get("code"),
+                'Distance' : self.request.get("dist"),
+                'Numbers'  : self.request.get("frec"),
+                'Plane'    : self.request.get("plane")}
 
         newroute = models.air_route()
         rescd = newroute.create(arg)
@@ -283,7 +293,7 @@ class Signin(webapp2.RequestHandler):
             if pr_user.password == passwd:
 
                 client_id = str(uuid.uuid4())
-                pr_list = {'clid':client_id,'mail':pr_user.email}
+                pr_list = {'clid':client_id,'mail':pr_user.email,'hash':user_key}
                 self.put_cookie(pr_list)
 
         self.redirect('/')
