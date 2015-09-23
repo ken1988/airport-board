@@ -16,7 +16,8 @@ from google.appengine.ext import db
 class MainPage(webapp2.RequestHandler):
     def initial_set(self,depart_port):
         if depart_port == '':
-            depart_port = "フリータウン空港"
+            depart_port = 'フリータウン空港'
+            depart_port = depart_port.decode("utf-8")
 
         allports = models.airport.all()
         q = models.air_route.all()
@@ -24,7 +25,6 @@ class MainPage(webapp2.RequestHandler):
         res = {"dept"     :depart_port,
                "allports" :allports,
                "allroutes": allroutes}
-
         return res
 
     def get(self):
@@ -36,9 +36,10 @@ class MainPage(webapp2.RequestHandler):
 
     def display(self):
         header_html = self.get_header()
-        res = self.initial_set(self.request.get("airport"))
+        depart_port = self.request.get("airport")
+        res = self.initial_set(depart_port)
 
-        template_values = {'sys_message':"メッセージはありません",
+        template_values = {'sys_message':'メッセージはありません',
                            'header':header_html,
                            'depart_port':res["dept"],
                            'allports': res["allports"],
@@ -195,7 +196,6 @@ class Route(webapp2.RequestHandler,registration_page):
 
     def post(self):
         str_airline = models.airline.get_by_key_name(self.request.get("airline")).company_name
-
 
         arg = {'departure':self.request.get("departure"),
                 'arrival': self.request.get("arrival"),

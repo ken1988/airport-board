@@ -7,13 +7,16 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>メインページ</title>
+<title>路線登録</title>
 
 <!-- Bootstrap core CSS -->
 <link href="../css/bootstrap.min.css" rel="stylesheet">
 
 <!-- Custom styles for this template -->
-<link href="starter-template.css" rel="stylesheet">
+<link href="../css/detail_setting.css" rel="stylesheet">
+
+<!-- Timepicker CSS -->
+<link href="../css/bootstrap-timepicker.css" rel="stylesheet">
 
 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 <!--[if lt IE 9]>
@@ -32,7 +35,7 @@
 		</div>
 		{% endif %}
 		<h2 class="sub-header">空路登録</h2>
-		<div class="panel panel-primary  col-lg-3 col-md-3">
+		<div class="panel panel-primary  col-lg-3 col-md-3" id="route_panel">
 			<form method="post" action="/Route">
 			<label>出発空港</label>
 			<select name="departure" id="departure" class="form-control">
@@ -50,34 +53,42 @@
 			</option>
 			{% endfor %}
 			</select>
+			<label>出発時刻</label>
+			<input type="text" id="dept_time" name="dept_time" class="form-control">
 			<label>所要時間</label>
-			<div class="input-group col-xs-6"><input type="text" name="dist" class="form-control"><span class="input-group-addon">時間</span></div>
+			<div class="input-group col-xs-7"><input type="number" id="dist" name="dist" class="form-control"><span class="input-group-addon">時間</span></div>
+			<fieldset disabled>
+			<label>到着時刻</label>
+			<div class="input-group col-xs-7"><input type="text" id="arrv_time" name="arrv_time" class="form-control"></div>
+			</fieldset>
 			<label>頻度</label>
-			<div class="input-group  col-xs-6"><span class="input-group-addon">1日</span><input type="text" name="frec" size="3" class="form-control"><span class="input-group-addon">本</span></div>
+			<div class="input-group  col-xs-7"><span class="input-group-addon">1日</span><input type="number" name="frec" size="3" class="form-control"><span class="input-group-addon">本</span></div>
 			<label>航空会社</label>
 			<select name="airline" id="airline" class="form-control">
 			{% for airline in allcompanies %}
-			<option value="{{ airline.key.name }}">
+			<option value="{{ airline.key.name }}" data-abb="{{ airline.company_abb }}">
 			{{ airline.company_name }}
 			</option>
 			{% endfor %}
 			</select>
 			<label>路線コード</label>
 			<div class="input-group  col-xs-8"><span class="input-group-addon" id="comp_abb">{{ allcompanies.0.company_abb }}</span><input type="text" name="code" placeholder="路線コード（8桁）" class="form-control"></div>
-			<label>使用機材</label><input type="text" name="plane" class="form-control">
+			<label>使用機材</label>
+			<div class="input-group  col-xs-8"><input type="text" name="plane" class="form-control"></div><br/>
 			<input type="submit" class="btn btn-primary">
 			</form>
 		</div>
 	</div>
 	<!-- /.container -->
 
-
 	<!-- Bootstrap core JavaScript
     ================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
-		type="text/javascript"></script>
-	<script src="../js/bootstrap.min.js" type="text/javascript"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
+	type="text/javascript"></script>
+<script src="../js/bootstrap.min.js" type="text/javascript"></script>
+<script src="../js/bootstrap-timepicker.js" type="text/javascript"></script>
+<script src="../js/airboard.js" type="text/javascript"></script>
 </body>
 </html>

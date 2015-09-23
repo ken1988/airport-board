@@ -50,6 +50,8 @@ class air_route(db.Model):
     Numbers = db.IntegerProperty()
     Distance = db.IntegerProperty()
     Plane = db.StringProperty(multiline=False)
+    Dept_time = db.TimeProperty()
+    Arrv_time = db.TimeProperty()
 
     def create(self,arg):
         try:
