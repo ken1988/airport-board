@@ -10,6 +10,7 @@ import uuid
 import Cookie
 import hashlib
 from datetime import datetime
+from datetime import time
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 
@@ -20,11 +21,12 @@ class MainPage(webapp2.RequestHandler):
             depart_port = depart_port.decode("utf-8")
 
         allports = models.airport.all()
-        q = models.air_route.all()
-        allroutes = q.filter("depart_port =", depart_port)
+        allroutes = models.air_route.all().filter("depart_port =", depart_port)
+        allroutes_ar = models.air_route.all().filter("arrival_port =", depart_port)
         res = {"dept"     :depart_port,
                "allports" :allports,
-               "allroutes": allroutes}
+               "allroutes": allroutes,
+               "allroutes_ar":allroutes_ar}
         return res
 
     def get(self):
@@ -43,7 +45,8 @@ class MainPage(webapp2.RequestHandler):
                            'header':header_html,
                            'depart_port':res["dept"],
                            'allports': res["allports"],
-                           'allroutes':res["allroutes"]}
+                           'allroutes':res["allroutes"],
+                           'allroutes_ar':res['allroutes_ar']}
         path = os.path.join(os.path.dirname(__file__), './templates/index.html')
         self.response.out.write(template.render(path, template_values))
 
@@ -55,10 +58,9 @@ class MainPage(webapp2.RequestHandler):
         else:
             user_hash = self.request.cookies.get('hash', '')
             user = models.user().get_by_key_name(user_hash, None)
-            country = models.country().get_by_key_name(user.country_key, None)
 
             template_values = {'login':1,
-                               'email':country.country_name}
+                               'email':user.country_name}
 
         path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
         header_html = template.render(path,template_values)
@@ -98,10 +100,9 @@ class registration_page():
         else:
             user_hash = self.request.cookies.get('hash', '')
             user = models.user().get_by_key_name(user_hash, None)
-            country = models.country().get_by_key_name(user.country_key, None)
 
             template_values = {'login':1,
-                               'email':country.country_name}
+                               'email':user.country_name}
 
         path = os.path.join(os.path.dirname(__file__), header_link)
         header_html = template.render(path,template_values)
@@ -196,15 +197,19 @@ class Route(webapp2.RequestHandler,registration_page):
 
     def post(self):
         str_airline = models.airline.get_by_key_name(self.request.get("airline")).company_name
+        h,m = self.request.get("dept_time").split(':')
+        dept_time = time(hour=int(h),minute=int(m),second=0)
+        code = self.request.get("comp_abb")+self.request.get("code")
 
         arg = {'departure':self.request.get("departure"),
                 'arrival': self.request.get("arrival"),
                 'airline': self.request.get("airline"),
                 'str_airline':str_airline,
-                'code'   : self.request.get("code"),
+                'code'   : code,
                 'Distance' : self.request.get("dist"),
                 'Numbers'  : self.request.get("frec"),
-                'Plane'    : self.request.get("plane")}
+                'Plane'    : self.request.get("plane"),
+                'dept_time': dept_time }
 
         newroute = models.air_route()
         rescd = newroute.create(arg)
@@ -254,17 +259,11 @@ class User(webapp2.RequestHandler):
         h = hashlib.md5()
         h.update(uid)
         user_key = h.hexdigest()
-        country_key = user_key + "c"
-
-        #country生成、country_key取得
-        new_country = models.country(key_name = country_key)
-        new_country.country_name = country_name
-        new_country.put()
 
         new_user = models.user(key_name = user_key)
         new_user.email = uid
         new_user.password = password
-        new_user.country_key = country_key
+        new_user.country_name = country_name
         new_user.put()
 
         self.redirect('/')

@@ -34,5 +34,6 @@
 
     $('#airline').change(function(){
     	$('#comp_abb').text($(this).children('option:selected').attr('data-abb'));
+    	$('#comp_abbh').val($('#comp_abb').text());
     });
  });

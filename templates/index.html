@@ -38,9 +38,9 @@
 			{% endfor %}
 			</select><input type="submit">
 		</form>
-		<h2 class="sub-header">{{ depart_port }}出発便</h2>
 		<div class="table-responsive">
-			<table class="table table-striped">
+			<h2 class="sub-header">{{ depart_port }}出発便</h2>
+			<table class="table table-striped" id="departure_table">
 				<thead>
 					<tr>
 						<th>時刻</th>
@@ -52,7 +52,28 @@
 				<tbody>
 					{% for air_route in allroutes %}
 					<tr>
-						<td>15:00</td>
+						<td>{{ air_route.Dept_time }}</td>
+						<td>{{ air_route.airports.1 }}</td>
+						<td><img src="/get_img?key={{ air_route.airline.0 }}" />{{ air_route.str_airline.0 }}</td>
+						<td>{{ air_route.route_code }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			<h2 class="sub-header">{{ depart_port }}到着便</h2>
+			<table class="table table-striped" id="arrival_table">
+				<thead>
+					<tr>
+						<th>時刻</th>
+						<th>行先</th>
+						<th>航空会社</th>
+						<th>便名</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for air_route in allroutes_ar %}
+					<tr>
+						<td>{{ air_route.Dept_time }}</td>
 						<td>{{ air_route.airports.1 }}</td>
 						<td><img src="/get_img?key={{ air_route.airline.0 }}" />{{ air_route.str_airline.0 }}</td>
 						<td>{{ air_route.route_code }}</td>

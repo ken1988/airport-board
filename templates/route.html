@@ -74,7 +74,8 @@
 			<label>路線コード</label>
 			<div class="input-group  col-xs-8"><span class="input-group-addon" id="comp_abb">{{ allcompanies.0.company_abb }}</span><input type="text" name="code" placeholder="路線コード（8桁）" class="form-control"></div>
 			<label>使用機材</label>
-			<div class="input-group  col-xs-8"><input type="text" name="plane" class="form-control"></div><br/>
+			<input type="text" name="plane" class="form-control"><br/>
+			<input type="hidden" name="comp_abb" id="comp_abbh" value="">
 			<input type="submit" class="btn btn-primary">
 			</form>
 		</div>

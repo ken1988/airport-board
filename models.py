@@ -4,6 +4,7 @@ Created on 2015/09/07
 @author: ken
 '''
 from google.appengine.ext import db
+from datetime import time
 
 class airport(db.Model):
     portname = db.StringProperty(multiline=False)
@@ -64,6 +65,7 @@ class air_route(db.Model):
             self.Numbers = int(arg['Numbers'])
             self.Distance = int(arg['Distance'])
             self.Plane = arg['Plane']
+            self.Dept_time = arg['dept_time']
             rescd = 0
 
         except Exception:
@@ -75,7 +77,4 @@ class air_route(db.Model):
 class user(db.Model):
     email = db.EmailProperty()
     password = db.StringProperty(multiline=False)
-    country_key = db.StringProperty(multiline=False)
-
-class country(db.Model):
     country_name = db.StringProperty(multiline=False)
