@@ -3,30 +3,34 @@
 Created on 2015/09/07
 @author: ken
 '''
-from google.appengine.ext import db
-from datetime import time
+from google.appengine.ext import ndb
 
-class airport(db.Model):
-    portname = db.StringProperty(multiline=False)
-    location = db.StringProperty(multiline=False)
-    location_key =db.StringProperty(multiline=False)
+class airport(ndb.Model):
+    portname = ndb.StringProperty()
+    portcode = ndb.StringProperty()
+    country_name = ndb.StringProperty()
+    location = ndb.StringProperty()
 
     def create(self,arg):
         try:
             self.portname = arg['portname']
+            self.portcode = arg['portcode']
             self.location = arg['location']
-            rescd = 0
+            self.country_name = arg['country_name']
+            rescd = {'code':0,'msg':'登録成功'}
+
         except ValueError:
-            rescd = 1
+            rescd = {'code':1,'msg':'登録時にエラー発生'}
+
         finally:
             return rescd
 
-class airline(db.Model):
-    company_name = db.StringProperty(multiline=False)
-    company_abb  = db.StringProperty(multiline=False)
-    company_logo = db.BlobProperty()
-    origin_country = db.StringProperty(multiline=False)
-    origin_key = db.StringProperty(multiline=False)
+class airline(ndb.Model):
+    company_name   = ndb.StringProperty()
+    company_abb    = ndb.StringProperty()
+    company_logo   = ndb.BlobProperty()
+    origin_country = ndb.StringProperty()
+    origin_key     = ndb.KeyProperty(kind='user')
 
     def create(self,arg):
         try:
@@ -34,25 +38,28 @@ class airline(db.Model):
             self.company_abb = arg['companyabb']
             self.origin_country = arg['country']
             self.company_logo = arg['company_logo']
+            rescd = {'code':0,'msg':'登録成功'}
 
-            rescd = 0
         except ValueError:
-            rescd = 1
+            rescd = {'code':1,'msg':'登録時にエラー発生'}
+
         finally:
             return rescd
 
-class air_route(db.Model):
-    route_code = db.StringProperty(multiline=False)
-    depart_port = db.StringProperty(multiline=False)
-    arrival_port= db.StringProperty(multiline=False)
-    airports  = db.ListProperty(item_type=str)
-    airline  = db.ListProperty(item_type=str)
-    str_airline = db.ListProperty(item_type=str)
-    Numbers = db.IntegerProperty()
-    Distance = db.IntegerProperty()
-    Plane = db.StringProperty(multiline=False)
-    Dept_time = db.TimeProperty()
-    Arrv_time = db.TimeProperty()
+class air_route(ndb.Model):
+    route_code = ndb.StringProperty()
+    depart_port = ndb.StringProperty()
+    dept_location = ndb.StringProperty()
+    arrival_port= ndb.StringProperty()
+    arriv_location = ndb.StringProperty()
+    airports  = ndb.StringProperty(repeated=True)
+    airline  = ndb.StringProperty(repeated=True)
+    str_airline = ndb.StringProperty(repeated=True)
+    Numbers = ndb.IntegerProperty()
+    Distance = ndb.IntegerProperty()
+    Plane = ndb.StringProperty()
+    Dept_time = ndb.TimeProperty()
+    Arrv_time = ndb.TimeProperty()
 
     def create(self,arg):
         try:
@@ -66,15 +73,17 @@ class air_route(db.Model):
             self.Distance = int(arg['Distance'])
             self.Plane = arg['Plane']
             self.Dept_time = arg['dept_time']
-            rescd = 0
+            self.Arrv_time = arg['arrv_time']
 
-        except Exception:
-            rescd = 1
+            rescd = {'code':0,'msg':'登録成功'}
+
+        except ValueError:
+            rescd = {'code':1,'msg':'登録時にエラー発生'}
 
         finally:
             return rescd
 
-class user(db.Model):
-    email = db.EmailProperty()
-    password = db.StringProperty(multiline=False)
-    country_name = db.StringProperty(multiline=False)
+class user(ndb.Model):
+    email        = ndb.StringProperty()
+    password     = ndb.StringProperty()
+    country_name = ndb.StringProperty()

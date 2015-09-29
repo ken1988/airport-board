@@ -44,7 +44,7 @@
 				<thead>
 					<tr>
 						<th>時刻</th>
-						<th>行先</th>
+						<th>到着地</th>
 						<th>航空会社</th>
 						<th>便名</th>
 					</tr>
@@ -53,8 +53,8 @@
 					{% for air_route in allroutes %}
 					<tr>
 						<td>{{ air_route.Dept_time }}</td>
-						<td>{{ air_route.airports.1 }}</td>
-						<td><img src="/get_img?key={{ air_route.airline.0 }}" />{{ air_route.str_airline.0 }}</td>
+						<td>{{ air_route.arrival_port }}</td>
+						<td><img src="/get_img?key={{ air_route.airline.0 }}" alt="{{ air_route.str_airline.0 }}"/></td>
 						<td>{{ air_route.route_code }}</td>
 					</tr>
 					{% endfor %}
@@ -65,7 +65,7 @@
 				<thead>
 					<tr>
 						<th>時刻</th>
-						<th>行先</th>
+						<th>出発地</th>
 						<th>航空会社</th>
 						<th>便名</th>
 					</tr>
@@ -73,9 +73,9 @@
 				<tbody>
 					{% for air_route in allroutes_ar %}
 					<tr>
-						<td>{{ air_route.Dept_time }}</td>
-						<td>{{ air_route.airports.1 }}</td>
-						<td><img src="/get_img?key={{ air_route.airline.0 }}" />{{ air_route.str_airline.0 }}</td>
+						<td>{{ air_route.Arrv_time }}</td>
+						<td>{{ air_route.depart_port }}</td>
+						<td><img src="/get_img?key={{ air_route.airline.0 }}" alt="{{ air_route.str_airline.0 }}"/></td>
 						<td>{{ air_route.route_code }}</td>
 					</tr>
 					{% endfor %}

@@ -30,10 +30,13 @@
 
 	<div class="container">
 		{% if remode == 1 %}
+		<div class="alert alert-danger">
+		{% else %}
 		<div class="alert alert-success">
+		{% endif %}
 			<p>{{ sys_message }}</p>
 		</div>
-		{% endif %}
+
 		<h2 class="sub-header">空路登録</h2>
 		<div class="panel panel-primary  col-lg-3 col-md-3" id="route_panel">
 			<form method="post" action="/Route">
@@ -56,13 +59,13 @@
 			<label>出発時刻</label>
 			<input type="text" id="dept_time" name="dept_time" class="form-control">
 			<label>所要時間</label>
-			<div class="input-group col-xs-7"><input type="number" id="dist" name="dist" class="form-control"><span class="input-group-addon">時間</span></div>
+			<div class="input-group col-xs-7"><input type="number" min="1" id="dist" name="dist" class="form-control" required="required" value="1"><span class="input-group-addon">時間</span></div>
 			<fieldset disabled>
 			<label>到着時刻</label>
-			<div class="input-group col-xs-7"><input type="text" id="arrv_time" name="arrv_time" class="form-control"></div>
+			<div class="input-group col-xs-7"><input type="text" id="arrv_time" class="form-control" value=""></div>
 			</fieldset>
 			<label>頻度</label>
-			<div class="input-group  col-xs-7"><span class="input-group-addon">1日</span><input type="number" name="frec" size="3" class="form-control"><span class="input-group-addon">本</span></div>
+			<div class="input-group  col-xs-7"><span class="input-group-addon">1日</span><input type="number" name="frec" size="3" class="form-control"><span class="input-group-addon" required="required">本</span></div>
 			<label>航空会社</label>
 			<select name="airline" id="airline" class="form-control">
 			{% for airline in allcompanies %}
@@ -72,10 +75,11 @@
 			{% endfor %}
 			</select>
 			<label>路線コード</label>
-			<div class="input-group  col-xs-8"><span class="input-group-addon" id="comp_abb">{{ allcompanies.0.company_abb }}</span><input type="text" name="code" placeholder="路線コード（8桁）" class="form-control"></div>
+			<div class="input-group  col-xs-8"><span class="input-group-addon" id="comp_abb">{{ allcompanies.0.company_abb }}</span><input type="text" name="code" placeholder="路線コード（4桁）" class="form-control" required="required"></div>
 			<label>使用機材</label>
-			<input type="text" name="plane" class="form-control"><br/>
-			<input type="hidden" name="comp_abb" id="comp_abbh" value="">
+			<input type="text" name="plane" class="form-control" required="required"><br/>
+			<input type="hidden" name="comp_abb" id="comp_abbh" value="{{ allcompanies.0.company_abb }}">
+			<input type="hidden" name="arrv_time" id="arrv_timeh" value="">
 			<input type="submit" class="btn btn-primary">
 			</form>
 		</div>

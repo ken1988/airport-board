@@ -9,6 +9,16 @@ libraries:
   version: "1.3"
 
 handlers:
+- url: /fonts/(.*\.otf)
+  static_files: fonts/\1
+  upload: fonts/(.*\.otf)
+  mime_type: application/x-font-otf
+
+- url: /fonts/(.*\.ttf)
+  static_files: fonts/\1
+  upload: fonts/(.*\.ttf)
+  mime_type: application/x-font-ttf
+
 - url: /css
   static_dir: css
 

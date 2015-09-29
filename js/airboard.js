@@ -23,6 +23,7 @@
     	var arrv_time = dept_h2+':'+depts[1];
 
     	$('#arrv_time').val(arrv_time);
+    	$('#arrv_timeh').val(arrv_time);
     }
 
     $('#dept_time').change(function(){
@@ -35,5 +36,9 @@
     $('#airline').change(function(){
     	$('#comp_abb').text($(this).children('option:selected').attr('data-abb'));
     	$('#comp_abbh').val($('#comp_abb').text());
+    });
+
+    $('#logofile').change(function() {
+        $('#cover').html($(this).val());
     });
  });

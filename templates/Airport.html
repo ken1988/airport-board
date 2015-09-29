@@ -40,13 +40,15 @@
 		</div>
 		{% endif %}
 		<h2 class="sub-header">空港登録</h2>
-		<div class="panel panel-primary">
+		<div class="panel panel-primary  col-lg-3 col-md-3" id="airport_panel">
 			<form method="post" action="/Airport">
-				<label>空港名</label><input type="text" name="portname"><br>
-				<label>所属国</label><input type="text" name="location">
-				<label>滑走路数</label>
-				<span>推定年間発着数</span>
-				<input type="submit">
+				<label>空港名</label>
+				<div class="input-group  col-xs-7"><input type="text" name="portname"  class="form-control"></div>
+				<label>空港コード</label>
+				<div class="input-group  col-xs-7"><input type="text" name="portcode"  class="form-control" placeholder="空港コード（3桁）"></div>
+				<label>所在都市</label>
+				<div class="input-group  col-xs-7"><input type="text" name="location" class="form-control"></div>
+				<input type="submit"  class="btn btn-primary">
 			</form>
 		</div>
 	</div>
