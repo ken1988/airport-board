@@ -48,8 +48,21 @@
 				<div class="input-group  col-xs-7"><input type="text" name="portcode"  class="form-control" placeholder="空港コード（3桁）"></div>
 				<label>所在都市</label>
 				<div class="input-group  col-xs-7"><input type="text" name="location" class="form-control"></div>
+				<label>第1滑走路</label>
+				<div class="input-group  col-xs-7">
+				<select name="runway" id="runway1" class="form-control">
+				<option value="1">1000m滑走路</option>
+				<option value="2">1500m滑走路</option>
+				<option value="3">2000m滑走路</option>
+				<option value="3">2500m滑走路</option>
+				<option value="5">3000m滑走路</option>
+				<option value="6">4000m滑走路</option>
+				</select></div>
+				<input type="button" value="追加" class="btn btn-primary">
+
 				<input type="submit"  class="btn btn-primary">
 			</form>
+			<a href="https://ja.wikipedia.org/wiki/%E7%A9%BA%E6%B8%AF%E3%82%B3%E3%83%BC%E3%83%89">参考リンク：空港コード</a>
 		</div>
 	</div>
 	<!-- /.container -->

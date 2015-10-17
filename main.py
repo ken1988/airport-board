@@ -13,7 +13,8 @@ from datetime import datetime
 from datetime import time
 from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb
-from pickle import EXT1
+from google.appengine.ext import db
+import json
 
 class MainPage(webapp2.RequestHandler):
     def initial_set(self,depart_port):
@@ -21,14 +22,14 @@ class MainPage(webapp2.RequestHandler):
             depart_port = 'フリータウン空港'
             depart_port = depart_port.decode("utf-8")
 
-        allports = models.airport.query()
+        countries = models.user.query()
         allroutes = models.air_route.query(models.air_route.depart_port == depart_port).order(models.air_route.Dept_time)
         allroutes_ar = models.air_route.query(models.air_route.arrival_port == depart_port).order(models.air_route.Arrv_time)
 
         res = {"dept"     :depart_port,
-               "allports" :allports,
                "allroutes": allroutes,
-               "allroutes_ar":allroutes_ar}
+               "allroutes_ar":allroutes_ar,
+               "countries": countries}
         return res
 
     def get(self):
@@ -46,9 +47,9 @@ class MainPage(webapp2.RequestHandler):
         template_values = {'sys_message':'メッセージはありません',
                            'header':header_html,
                            'depart_port':res["dept"],
-                           'allports': res["allports"],
                            'allroutes':res["allroutes"],
-                           'allroutes_ar':res['allroutes_ar']}
+                           'allroutes_ar':res['allroutes_ar'],
+                           'countries':res['countries']}
         path = os.path.join(os.path.dirname(__file__), './templates/index.html')
         self.response.out.write(template.render(path, template_values))
 
@@ -89,12 +90,16 @@ class registration_page():
         res['airport'] = ''
         res['airline'] = ''
         return res
+    def setval_ap(self):
+        additionals = {}
+        return additionals
 
     def get(self):
         res = self.setval()
-        self.display(res)
+        additionals = self.setval_ap()
+        self.display(res,additionals)
 
-    def display(self,res):
+    def display(self,res,additionals):
         header_link = './templates/header_menu.html'
         client_id = self.request.cookies.get('clid', '')
         if client_id == '':
@@ -109,23 +114,106 @@ class registration_page():
         path = os.path.join(os.path.dirname(__file__), header_link)
         header_html = template.render(path,template_values)
 
+        if self.request.get("mode") == 'u':
+            disp_link = res['disp_link_u']
+        else:
+            disp_link = res['disp_link']
+
         template_values = {'sys_message':res['msg'],
                            'header':header_html,
                            'remode':res['rescd'],
                            'allcompanies':res['airline'],
-                           'allports':res['airport']}
-        path = os.path.join(os.path.dirname(__file__),res['disp_link'])
+                           'allports':res['airport'],
+                           'additionals':additionals,
+                           'country_name':user.country_name}
+        path = os.path.join(os.path.dirname(__file__),disp_link)
         self.response.out.write(template.render(path, template_values))
 
+    def create(self):
+        return
+
+    def update(self):
+
+        return
+
+    def delete(self):
+
+        return
+
+    def basic_validation(self,items):
+    #items:validation対象となるデータ群
+    #{kind:"アイテムの種類",type:"データタイプ,"item:"対象データ",len:"桁長",lenc:"桁長符号(以上、以下、イコール)",
+    # alpha:"英文字",alphac:"英文字の扱い(NG、OK、ONLY)",
+    # numer:"数字",numerc:"数字の扱い(NG、OK、ONLY)",code}
+        try:
+            code = 0
+            msg ="エラーなし"
+            for item in items:
+                if item["item"] == '':
+                #入力値チェック
+                    msg = item["item"]+"が入力されていません"
+                    code = 1
+                    break
+
+                else:
+                #桁数確認
+                    if item["lenc"] == "MT" and len(item["item"]) < item["len"]:
+                        msg =item["type"]+"は"+str(item["len"])+"以上にしてください"
+                        code = 1
+
+                    elif item["lenc"] == "LT" and len(item["item"]) > item["len"]:
+                        msg =item["type"]+"は"+str(item["len"])+"以下にしてください"
+                        code = 1
+
+                    elif item["lenc"] == "EQ" and len(item["item"]) <> item["len"]:
+                        msg =item["type"]+"は"+str(item["len"])+"にしてください"
+                        code = 1
+
+                #数字の扱い
+
+                #英文字の扱い
+
+                #マイナス値の確認
+                    if item['item'] < 0:
+                        msg = item["kind"] + "がマイナスです"
+                        code = 1
+
+                #コード存在の確認
+                    if item.has_key('code') and item["code"] == "Y":
+                        if item["kind"] == "空港":
+                            fetch = models.airport().get_by_id(item["item"])
+
+                        elif item["kind"] == "航空会社":
+                            fetch = models.airline().get_by_id(item["item"])
+
+                        elif item["kind"] == "空路":
+                            fetch = models.air_route().get_by_id(item["item"])
+
+                        if fetch is not None:
+                            msg = item["kind"] + "が登録済みです"
+                            code = 1
+
+                    if code == 1:
+                        break
+
+        except Exception as e:
+            code = 1
+            msg = "message:{0}".format(e.message)
+
+        res = {'code':code,'msg':msg}
+        return res
 
 class Airline(webapp2.RequestHandler,registration_page):
     def setval(self):
         res= {}
         res['disp_link'] = './templates/Airline.html'
+        res['disp_link_u'] = './templates/Airline_u.html'
         res['msg'] = '航空会社を登録してください'
         res['rescd'] = 2
+        all_lines = models.airline.query()
+
         res['airport'] = ''
-        res['airline'] = ''
+        res['airline'] = all_lines
         return res
 
     def post(self):
@@ -148,41 +236,83 @@ class Airline(webapp2.RequestHandler,registration_page):
         res = self.setval()
         res['rescd'] = rescd['code']
         res['msg'] = rescd['msg']
-        self.display(res)
+        self.display(res,"")
         return
 
 class Airport(webapp2.RequestHandler,registration_page):
     def setval(self):
         res= {}
         res['disp_link'] = './templates/Airport.html'
+        res['disp_link_u'] = './templates/Airport_u.html'
         res['msg'] = '空港を登録してください'
         res['rescd'] = 2
-        res['airport'] = ''
+        allports = models.airport.query()
+
+        res['airport'] = allports
         res['airline'] = ''
+
         return res
 
     def post(self):
-        user_hash = self.request.cookies.get('hash', '')
-        user = models.user().get_by_id(user_hash)
+        if self.request.get("mode") == "u":
+            items =[{"item":self.request.get("portname"),"type":"名称","kind":"空港","len":50,"lenc":"LT"},
+                    {"item":self.request.get("portcode"),"type":"コード","kind":"空港","len":3,"lenc":"EQ"},
+                    {"item":self.request.get("location"),"type":"所在地","kind":"空港","len":100,"lenc":"LT"}]
 
-        arg = {'portname': self.request.get("portname"),
-               'location': self.request.get("location"),
-               'country_name':user.country_name}
-        newport = models.airport()
-        rescd = newport.create(arg)
+        else:
+            items =[{"item":self.request.get("portname"),"type":"名称","kind":"空港","len":50,"lenc":"LT"},
+                    {"item":self.request.get("portcode"),"type":"コード","kind":"空港","len":3,"lenc":"EQ","code":"Y"},
+                    {"item":self.request.get("location"),"type":"所在地","kind":"空港","len":100,"lenc":"LT"}]
 
-        if rescd['code'] == 0:
-            newport.put()
+        valres = self.basic_validation(items)
+
+        if valres['code'] == 1:
+            recd = valres['code']
+            remsg = valres['msg']
+
+        else:
+            if self.request.get("country_name") == "":
+                user_hash = self.request.cookies.get('hash', '')
+                user = models.user().get_by_id(user_hash)
+                country_name = user.country_name
+            else:
+                country_name = self.request.get("country_name")
+
+            arg = {'portname': self.request.get("portname"),
+                   'portcode': self.request.get("portcode"),
+                   'location': self.request.get("location"),
+                   'country_name':country_name}
+
+            if self.request.get("mode") == "u":
+                port_code = ''
+                port_code = self.request.get("portid")
+
+                if port_code.isdigit():
+                    port_code = int(port_code)
+
+                smsg = "空港情報を更新しました"
+            else:
+                port_code = self.request.get("portcode")
+                smsg = "空港情報を登録しました"
+
+            target_port = models.airport().get_by_id(port_code)
+            rescd = target_port.create(arg)
+
+            if rescd['code'] == 0:
+                target_port.put()
+
+                recd = rescd['code']
+                remsg = smsg
 
         res = self.setval()
-        res['rescd'] = rescd['code']
-        res['msg'] = rescd['msg']
-        self.display(rescd)
+        res['rescd'] = recd
+        res['msg'] = remsg
+        self.display(res,"")
         return
 
 class Route(webapp2.RequestHandler,registration_page):
     def setval(self):
-        res= {}
+        res={}
         res['disp_link'] = './templates/route.html'
         res['msg'] = '空路を設定してください'
         res['rescd'] = 2
@@ -196,8 +326,14 @@ class Route(webapp2.RequestHandler,registration_page):
         return res
 
     def post(self):
-        valres = self.validate()
-        if valres['code'] == 1:
+        code = self.request.get("comp_abb")+self.request.get("code")
+        items =[{"item":self.request.get("dist"),"type":"時間","kind":"空路", "len":3,"lenc":"LT"},
+                {"item":code,"type":"路線コード","kind":"空路","len":8,"lenc":"LT"}]
+
+        valres = self.basic_validation(items)
+        valres2 = self.validate()
+
+        if valres['code'] * valres2['code'] == 1:
             recd = valres['code']
             remsg = valres['msg']
 
@@ -222,7 +358,7 @@ class Route(webapp2.RequestHandler,registration_page):
                         'dept_time': times['dept_time'],
                         'arrv_time': times['arrv_time']}
 
-                newroute = models.air_route()
+                newroute = models.air_route(id = code)
                 rescd = newroute.create(arg)
                 recd =  rescd['code']
                 remsg = rescd['msg']
@@ -230,10 +366,26 @@ class Route(webapp2.RequestHandler,registration_page):
                 if rescd['code'] == 0:
                     newroute.put()
 
+                    tkey = newroute.key
+
+                    arrv_port = models.airport.query(models.airport.portname == self.request.get("arrival")).get()
+                    port_list = []
+                    port_list = arrv_port.ls_route_arrival
+                    port_list.append(tkey)
+                    arrv_port.ls_route_arrival = port_list
+                    arrv_port.put()
+
+                    dept_port = models.airport.query(models.airport.portname == self.request.get("departure")).get()
+                    port_list = []
+                    port_list = dept_port.ls_route_departure
+                    port_list.append(tkey)
+                    dept_port.ls_route_departure = port_list
+                    dept_port.put()
+
         res = self.setval()
         res['rescd'] = recd
         res['msg']   = remsg
-        self.display(res)
+        self.display(res,"")
 
         return
 
@@ -254,28 +406,9 @@ class Route(webapp2.RequestHandler,registration_page):
 
     def validate(self):
         try:
-            #入力値確認
-            if (self.request.get("dept_time") == '' or
-                self.request.get("arrv_time") == '' or
-                self.request.get("code") == '' or
-                self.request.get("dist") == '' or
-                self.request.get("code") == ''):
-                msg = "入力されていない項目があります"
-                raise ValueError
-
             #出発空港と到着空港が一致していない事を確認
             if self.request.get("departure") == self.request.get("arrival"):
                 msg = "出発地と到着地が同じです"
-                raise ValueError
-
-            #所要時間がマイナスじゃないことを確認
-            if self.request.get("dist") < 0:
-                msg = "所要時間がマイナスです"
-                raise ValueError
-
-            #路線コード桁数が４桁以内であることを確認
-            if self.request.get("code") > 4:
-                msg = "路線コードが４桁を超えています"
                 raise ValueError
 
             res = {'code':0,'msg':'エラーなし'}
@@ -377,10 +510,80 @@ class Signin(webapp2.RequestHandler):
             self.response.headers.add_header('Set-Cookie', myCookie.output(header=""))
         return
 
+class Port_list(webapp2.RequestHandler):
+    def get(self):
+        if self.request.get("mode") == 'uni':
+            port_code = ''
+            port_code = self.request.get('port_id')
+
+            if port_code.isdigit():
+                port = models.airport.get_by_id(int(port_code))
+            else:
+                port = models.airport.get_by_id(port_code)
+
+            report = port.to_dict()
+
+            #ヘッダー情報
+            self.response.headers['Content-Type'] = 'application/json'
+            self.response.out.write(json.dumps(report))
+
+        else:
+            t_country = self.request.get('country')
+            res = self.get_ports(t_country)
+
+            #ヘッダー情報
+            self.response.headers['Content-Type'] = 'application/json'
+            self.response.out.write(json.dumps(res))
+            return
+
+    def get_ports(self, t_country):
+        allports = models.airport.query(models.user.country_name == t_country)
+        res = []
+
+        for port in allports:
+            portname = port.portname.encode('utf_8')
+            res.append(portname)
+
+        return res
+
+class Airline_list(webapp2.RequestHandler):
+    def get(self):
+        if self.request.get("mode") == 'uni':
+            airline_code = ''
+            airline_code = self.request.get('company_id')
+            airline = models.airline.get_by_id(airline_code)
+            report = airline.to_dict()
+            report.pop('company_logo')
+
+            #ヘッダー情報
+            self.response.headers['Content-Type'] = 'application/json'
+            self.response.out.write(json.dumps(report))
+
+        else:
+            t_country = self.request.get('country')
+            res = self.get_airlines(t_country)
+
+            #ヘッダー情報
+            self.response.headers['Content-Type'] = 'application/json'
+            self.response.out.write(json.dumps(res))
+
+
+    def get_airlines(self, t_country):
+        allwings = models.airline.query(models.user.country_name == t_country)
+        res = []
+
+        for airline in allwings:
+            company_name = airline.company_name.encode('utf_8')
+            res.append(company_name)
+
+        return res
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/Airline', Airline),
                                ('/Airport', Airport),
                                ('/Route', Route),
                                ('/User', User),
                                ('/Signin', Signin),
-                               ('/get_img',Get_image)], debug=True)
+                               ('/get_img',Get_image),
+                               ('/port_list',Port_list),
+                               ('/airline_list',Airline_list)], debug=True)

@@ -10,6 +10,10 @@ class airport(ndb.Model):
     portcode = ndb.StringProperty()
     country_name = ndb.StringProperty()
     location = ndb.StringProperty()
+    ls_route_arrival =ndb.KeyProperty(repeated=True)
+    ls_route_departure = ndb.KeyProperty(repeated=True)
+    portPoint = ndb.IntegerProperty()
+    portEquip = ndb.StringProperty(repeated=True)
 
     def create(self,arg):
         try:
@@ -38,7 +42,7 @@ class airline(ndb.Model):
             self.company_abb = arg['companyabb']
             self.origin_country = arg['country']
             self.company_logo = arg['company_logo']
-            rescd = {'code':0,'msg':'登録成功'}
+            rescd = {'code':0,'msg':''}
 
         except ValueError:
             rescd = {'code':1,'msg':'登録時にエラー発生'}

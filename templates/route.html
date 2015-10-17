@@ -69,13 +69,13 @@
 			<label>航空会社</label>
 			<select name="airline" id="airline" class="form-control">
 			{% for airline in allcompanies %}
-			<option value="{{ airline.key.name }}" data-abb="{{ airline.company_abb }}">
+			<option value="{{ airline.key.id }}" data-abb="{{ airline.company_abb }}">
 			{{ airline.company_name }}
 			</option>
 			{% endfor %}
 			</select>
 			<label>路線コード</label>
-			<div class="input-group  col-xs-8"><span class="input-group-addon" id="comp_abb">{{ allcompanies.0.company_abb }}</span><input type="text" name="code" placeholder="路線コード（4桁）" class="form-control" required="required"></div>
+			<div class="input-group  col-xs-8"><span class="input-group-addon" id="comp_abb">{{ allcompanies.0.company_abb }}</span><input type="text" name="code" placeholder="路線コード（合計7桁以下）" class="form-control" required="required"></div>
 			<label>使用機材</label>
 			<input type="text" name="plane" class="form-control" required="required"><br/>
 			<input type="hidden" name="comp_abb" id="comp_abbh" value="{{ allcompanies.0.company_abb }}">

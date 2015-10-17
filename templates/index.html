@@ -31,11 +31,13 @@
 		<div class="alert alert-success">
 			<p>{{ sys_message }}</p>
 		</div>
+		<select name="country" id="country">
+		{% for country in countries %}
+			<option>{{ country.country_name }}</option>
+		{% endfor %}
+		</select>
 		<form method="post" action="/">
-			<select name="airport">
-			{% for airport in allports %}
-				<option>{{ airport.portname }}</option>
-			{% endfor %}
+			<select name="airport" id="airport">
 			</select><input type="submit">
 		</form>
 		<div class="table-responsive">
@@ -95,5 +97,6 @@
 	type="text/javascript"></script>
 <script src="../js/bootstrap.min.js" type="text/javascript"></script>
 <script src="../js/bootstrap-timepicker.js" type="text/javascript"></script>
+<script src="../js/airboard.js" type="text/javascript"></script>
 </body>
 </html>
