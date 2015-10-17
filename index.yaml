@@ -1,0 +1,11 @@
+indexes:
+
+- kind: air_route
+  properties:
+  - name: depart_port
+  - name: Dept_time
+
+- kind: air_route
+  properties:
+  - name: arrival_port
+  - name: Arrv_time
