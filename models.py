@@ -6,14 +6,16 @@ Created on 2015/09/07
 from google.appengine.ext import ndb
 
 class airport(ndb.Model):
-    portname = ndb.StringProperty()
-    portcode = ndb.StringProperty()
-    country_name = ndb.StringProperty()
-    location = ndb.StringProperty()
-    ls_route_arrival =ndb.KeyProperty(repeated=True)
-    ls_route_departure = ndb.KeyProperty(repeated=True)
-    portPoint = ndb.IntegerProperty()
-    portEquip = ndb.StringProperty(repeated=True)
+    portname    = ndb.StringProperty()
+    portcode    = ndb.StringProperty()
+    country_name= ndb.StringProperty()
+    origin_key  = ndb.KeyProperty(kind='user')
+    location    = ndb.StringProperty()
+    portPoint   = ndb.IntegerProperty()
+    portEquip   = ndb.StringProperty(repeated=True)
+    ls_route_arrival    = ndb.KeyProperty(repeated=True)
+    ls_route_departure  = ndb.KeyProperty(repeated=True)
+    portPoint   = ndb.IntegerProperty()
 
     def create(self,arg):
         try:

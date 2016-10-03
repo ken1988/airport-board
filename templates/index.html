@@ -23,6 +23,16 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+<script src="../js/sugar.js" type="text/javascript"></script>
+<script>
+function clock(){
+    var nowFormated = new Sugar.Date.create('today');
+    document.getElementById('clock-01').innerHTML = nowFormated;
+    // 1秒(1000ミリ)ごとに処理を実効
+    window.setTimeout("clock()", 1000);
+}
+window.onload = clock;
+</script>
 </head>
 
 <body>
@@ -31,6 +41,7 @@
 		<div class="alert alert-success">
 			<p>{{ sys_message }}</p>
 		</div>
+		<div id="clock-01"></div>
 		<select name="country" id="country">
 		{% for country in countries %}
 			<option>{{ country.country_name }}</option>
@@ -98,5 +109,6 @@
 <script src="../js/bootstrap.min.js" type="text/javascript"></script>
 <script src="../js/bootstrap-timepicker.js" type="text/javascript"></script>
 <script src="../js/airboard.js" type="text/javascript"></script>
+
 </body>
 </html>

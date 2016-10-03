@@ -13,7 +13,6 @@ from datetime import datetime
 from datetime import time
 from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb
-from google.appengine.ext import db
 import json
 
 class MainPage(webapp2.RequestHandler):
@@ -82,7 +81,7 @@ class Get_image(webapp2.RequestHandler):
         return
 
 class registration_page():
-    def setval(self):
+    def setval(self,user):
         res= {}
         res['disp_link'] = ''
         res['msg'] = ''
@@ -95,21 +94,26 @@ class registration_page():
         return additionals
 
     def get(self):
-        res = self.setval()
+        user = self.user_disp()
+        res = self.setval(user)
         additionals = self.setval_ap()
         self.display(res,additionals)
 
-    def display(self,res,additionals):
-        header_link = './templates/header_menu.html'
+    def user_disp(self):
         client_id = self.request.cookies.get('clid', '')
         if client_id == '':
             self.redirect('/')
         else:
             user_hash = self.request.cookies.get('hash', '')
             user = models.user().get_by_id(user_hash)
+        return user
 
-            template_values = {'login':1,
-                               'email':user.country_name}
+    def display(self,res,additionals):
+        header_link = './templates/header_menu.html'
+        user = self.user_disp()
+
+        template_values = {'login':1,
+                            'email':user.country_name}
 
         path = os.path.join(os.path.dirname(__file__), header_link)
         header_html = template.render(path,template_values)
@@ -125,7 +129,8 @@ class registration_page():
                            'allcompanies':res['airline'],
                            'allports':res['airport'],
                            'additionals':additionals,
-                           'country_name':user.country_name}
+                           'country_name':user.country_name,
+                           'origin_key': user.key.id}
         path = os.path.join(os.path.dirname(__file__),disp_link)
         self.response.out.write(template.render(path, template_values))
 
@@ -204,7 +209,7 @@ class registration_page():
         return res
 
 class Airline(webapp2.RequestHandler,registration_page):
-    def setval(self):
+    def setval(self,user):
         res= {}
         res['disp_link'] = './templates/Airline.html'
         res['disp_link_u'] = './templates/Airline_u.html'
@@ -240,19 +245,17 @@ class Airline(webapp2.RequestHandler,registration_page):
         return
 
 class Airport(webapp2.RequestHandler,registration_page):
-    def setval(self):
+    def setval(self,user):
         res= {}
         res['disp_link'] = './templates/Airport.html'
         res['disp_link_u'] = './templates/Airport_u.html'
         res['msg'] = '空港を登録してください'
         res['rescd'] = 2
-        allports = models.airport.query()
-
+        allports = models.airport.query().filter(models.airport.country_name == user.country_name)
         res['airport'] = allports
         res['airline'] = ''
 
         return res
-
     def post(self):
         if self.request.get("mode") == "u":
             items =[{"item":self.request.get("portname"),"type":"名称","kind":"空港","len":50,"lenc":"LT"},
@@ -281,7 +284,8 @@ class Airport(webapp2.RequestHandler,registration_page):
             arg = {'portname': self.request.get("portname"),
                    'portcode': self.request.get("portcode"),
                    'location': self.request.get("location"),
-                   'country_name':country_name}
+                   'country_name':country_name,
+                   'origin_key': user_hash}
 
             if self.request.get("mode") == "u":
                 port_code = ''
@@ -311,7 +315,7 @@ class Airport(webapp2.RequestHandler,registration_page):
         return
 
 class Route(webapp2.RequestHandler,registration_page):
-    def setval(self):
+    def setval(self,user):
         res={}
         res['disp_link'] = './templates/route.html'
         res['msg'] = '空路を設定してください'

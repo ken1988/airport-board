@@ -23,46 +23,89 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+<link href="../css/bootstrap-editable.css" rel="stylesheet">
 </head>
 
 <body>
-{{ header }}
+	{{ header }}
 
 	<div class="container">
 		{% if remode == 0 %}
 		<div class="alert alert-success">
-		<p>{{ sys_message }}</p>
+			<p>{{ sys_message }}</p>
 		</div>
-		{% endif %}
-		{% if remode == 1  %}
+		{% endif %} {% if remode == 1 %}
 		<div class="alert alert-danger">
-		<p>{{ sys_message }}</p>
+			<p>{{ sys_message }}</p>
 		</div>
 		{% endif %}
-		<h2 class="sub-header">空港登録</h2>
+		<div class="panel panel-primary col-md-11">
+			<h2 class="sub-header">{{ country_name }}空港リスト</h2>
+			<table class="table" id="airport_panel">
+				<thead>
+					<tr>
+						<th class="col-md-1">規模</th>
+						<th class="col-md-1">空港コード</th>
+						<th class="col-md-3">空港名</th>
+						<th class="col-md-3">所在都市</th>
+						<th class="col-md-3">設備</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for port in allports %}
+					<form method="post" action="/Airport" role="form" data-toggle="validator">
+					<tr>
+					<td></td>
+					<td><input type="text" name="portname" id="portname" class="form-control" value="{{ port.portcode }}" required="required"></td>
+					<td><input type="text" data-minlength="3" name="portcode" class="form-control" value="{{ port.portname }}" required="required"></td>
+					<td><input type="text" name="location" id="location" value="{{ port.location }}" class="form-control" required="required"></td>
+					<td>{{ port.portEquip.1 }}</td>
+					<td>
+					<input type="hidden" name="origin_country" value="{{ origin_key }}">
+					<input type="hidden" name="mode" value="u">
+					<input type="hidden" name="portid" id="portid" value="{{ port.key.id }}">
+					<input type="submit" class="btn btn-primary"></td>
+					</tr>
+							</form>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+
 		<div class="panel panel-primary  col-lg-3 col-md-3" id="airport_panel">
+		<h2 class="sub-header">空港登録</h2>
 			<form method="post" action="/Airport">
 				<label>空港名</label>
-				<div class="input-group  col-xs-7"><input type="text" name="portname"  class="form-control"></div>
+				<div class="input-group  col-xs-7">
+					<input type="text" name="portname" class="form-control">
+				</div>
 				<label>空港コード</label>
-				<div class="input-group  col-xs-7"><input type="text" name="portcode"  class="form-control" placeholder="空港コード（3桁）"></div>
+				<div class="input-group  col-xs-7">
+					<input type="text" name="portcode" class="form-control"
+						placeholder="空港コード（3桁）">
+				</div>
 				<label>所在都市</label>
-				<div class="input-group  col-xs-7"><input type="text" name="location" class="form-control"></div>
+				<div class="input-group  col-xs-7">
+					<input type="text" name="location" class="form-control">
+				</div>
 				<label>第1滑走路</label>
 				<div class="input-group  col-xs-7">
-				<select name="runway" id="runway1" class="form-control">
-				<option value="1">1000m滑走路</option>
-				<option value="2">1500m滑走路</option>
-				<option value="3">2000m滑走路</option>
-				<option value="3">2500m滑走路</option>
-				<option value="5">3000m滑走路</option>
-				<option value="6">4000m滑走路</option>
-				</select></div>
-				<input type="button" value="追加" class="btn btn-primary">
-
-				<input type="submit"  class="btn btn-primary">
+					<select name="runway" id="runway1" class="form-control">
+						<option value="1">1000m滑走路</option>
+						<option value="2">1500m滑走路</option>
+						<option value="3">2000m滑走路</option>
+						<option value="3">2500m滑走路</option>
+						<option value="5">3000m滑走路</option>
+						<option value="6">4000m滑走路</option>
+					</select>
+				</div>
+				<input type="button" value="追加" class="btn btn-primary"> <input
+					type="submit" class="btn btn-primary">
 			</form>
-			<a href="https://ja.wikipedia.org/wiki/%E7%A9%BA%E6%B8%AF%E3%82%B3%E3%83%BC%E3%83%89">参考リンク：空港コード</a>
+			<a
+				href="https://ja.wikipedia.org/wiki/%E7%A9%BA%E6%B8%AF%E3%82%B3%E3%83%BC%E3%83%89">参考リンク：空港コード</a>
 		</div>
 	</div>
 	<!-- /.container -->
@@ -71,10 +114,11 @@
 	<!-- Bootstrap core JavaScript
     ================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
-<script
-	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
-	type="text/javascript"></script>
-<script src="../js/bootstrap.min.js" type="text/javascript"></script>
-<script src="../js/bootstrap-timepicker.js" type="text/javascript"></script>
+	<script
+		src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"
+		type="text/javascript"></script>
+	<script src="../js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="../js/bootstrap-timepicker.js" type="text/javascript"></script>
+	<script src="../js/bootstrap-editable.js" type="text/javascript"></script>
 </body>
 </html>
