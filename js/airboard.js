@@ -26,8 +26,6 @@
     	$('#arrv_timeh').val(arrv_time);
     }
 
-
-
     $('#dept_time').change(function(){
     	Chg_artime();
     });

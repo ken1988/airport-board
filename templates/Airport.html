@@ -58,17 +58,23 @@
 					<form method="post" action="/Airport" role="form" data-toggle="validator">
 					<tr>
 					<td></td>
-					<td><input type="text" name="portname" id="portname" class="form-control" value="{{ port.portcode }}" required="required"></td>
-					<td><input type="text" data-minlength="3" name="portcode" class="form-control" value="{{ port.portname }}" required="required"></td>
-					<td><input type="text" name="location" id="location" value="{{ port.location }}" class="form-control" required="required"></td>
-					<td>{{ port.portEquip.1 }}</td>
+					<td><input type="text" name="portcode" id="portcode" class="form-control" value="{{ port.portcode }}" required="required"></td>
+					<td><input type="text" data-minlength="3" name="portname" id="portname" class="form-control" value="{{ port.portname }}" required="required"></td>
+					<td><input type="text" name="location" id="location" class="form-control" value="{{ port.location }}" required="required"></td>
+					<td>
+					<ul>
+					{% for runway in port.portEquip %}
+					<li>第{{ runway.number }}滑走路：{{ runway.distance }}m</li>
+					{% endfor %}
+					</ul>
+					<input type="button" value="空港デザイナ" class="btn btn-primary"></td>
 					<td>
 					<input type="hidden" name="origin_country" value="{{ origin_key }}">
 					<input type="hidden" name="mode" value="u">
 					<input type="hidden" name="portid" id="portid" value="{{ port.key.id }}">
 					<input type="submit" class="btn btn-primary"></td>
 					</tr>
-							</form>
+					</form>
 					{% endfor %}
 				</tbody>
 			</table>
@@ -101,8 +107,8 @@
 						<option value="6">4000m滑走路</option>
 					</select>
 				</div>
-				<input type="button" value="追加" class="btn btn-primary"> <input
-					type="submit" class="btn btn-primary">
+				<input type="button" value="追加" class="btn btn-primary">
+				<input type="submit" class="btn btn-primary">
 			</form>
 			<a
 				href="https://ja.wikipedia.org/wiki/%E7%A9%BA%E6%B8%AF%E3%82%B3%E3%83%BC%E3%83%89">参考リンク：空港コード</a>
@@ -120,5 +126,6 @@
 	<script src="../js/bootstrap.min.js" type="text/javascript"></script>
 	<script src="../js/bootstrap-timepicker.js" type="text/javascript"></script>
 	<script src="../js/bootstrap-editable.js" type="text/javascript"></script>
+	<script src="../js/portDesigner.js" type="text/javascript"></script>
 </body>
 </html>

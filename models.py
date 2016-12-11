@@ -4,6 +4,33 @@ Created on 2015/09/07
 @author: ken
 '''
 from google.appengine.ext import ndb
+import logging
+
+class runway(ndb.Model):
+    number      = ndb.IntegerProperty()
+    degree      = ndb.IntegerProperty()
+    distance    = ndb.IntegerProperty()
+    runwaypoint = ndb.IntegerProperty()
+    root_pointX = ndb.IntegerProperty()
+    root_pointY = ndb.IntegerProperty()
+    def initialize(self):
+
+        if self.distance >= 4000:
+            self.runwaypoint = 8
+
+        elif self.distance >= 3000:
+            self.runwaypoint = 4
+
+        elif self.runwaypoint >= 2000:
+            self.runwaypoint = 2
+
+        else:
+            self.runwaypoint = 1
+
+        if self.distance % 1000 == 500:
+            self.runwaypoint += 1
+
+        return self.runwaypoint
 
 class airport(ndb.Model):
     portname    = ndb.StringProperty()
@@ -12,9 +39,9 @@ class airport(ndb.Model):
     origin_key  = ndb.KeyProperty(kind='user')
     location    = ndb.StringProperty()
     portPoint   = ndb.IntegerProperty()
-    portEquip   = ndb.StringProperty(repeated=True)
-    ls_route_arrival    = ndb.KeyProperty(repeated=True)
-    ls_route_departure  = ndb.KeyProperty(repeated=True)
+    portEquip   = ndb.StructuredProperty(runway, repeated = True)
+    ls_route_arrival    = ndb.KeyProperty(repeated = True)
+    ls_route_departure  = ndb.KeyProperty(repeated = True)
     portPoint   = ndb.IntegerProperty()
 
     def create(self,arg):
@@ -22,7 +49,13 @@ class airport(ndb.Model):
             self.portname = arg['portname']
             self.portcode = arg['portcode']
             self.location = arg['location']
+            self.origin_key=arg['origin_key']
+            self.portEquip  = arg['runway']
+            self.portPoint  = arg['portpoint']
             self.country_name = arg['country_name']
+
+            self.calc_point(arg['maxpoint'])
+
             rescd = {'code':0,'msg':'登録成功'}
 
         except ValueError:
@@ -30,6 +63,39 @@ class airport(ndb.Model):
 
         finally:
             return rescd
+
+    def update(self,arg):
+        try:
+            self.portname = arg['portname']
+            self.portcode = arg['portcode']
+            self.location = arg['location']
+            self.origin_key = arg['origin_key']
+            self.portEquip  = arg['runway']
+
+            rescd = {'code':0,'msg':'更新成功'}
+
+        except Exception as e:
+            rescd = {'code':1,'msg':'更新時にエラー発生'}
+            logging.error(e)
+
+        finally:
+            chksize = self.calc_point(arg['maxpoint'])
+            if chksize['code'] == 1:
+                rescd = chksize
+
+            return rescd
+
+    def calc_point(self,maxpoint):
+        self.portPoint = 10
+        for runway in self.portEquip:
+            self.portPoint += runway.runwaypoint
+
+        if self.portPoint > maxpoint:
+            rescd = {'code':1,'msg': '有効ポイント：' + str(maxpoint) +'に対して空港規模' + str(self.portPoint) + 'が大きすぎる'}
+        else:
+            rescd = {'code':0,'msg': self.portPoint}
+
+        return rescd
 
 class airline(ndb.Model):
     company_name   = ndb.StringProperty()
@@ -93,3 +159,4 @@ class user(ndb.Model):
     email        = ndb.StringProperty()
     password     = ndb.StringProperty()
     country_name = ndb.StringProperty()
+    port_point   = ndb.IntegerProperty()

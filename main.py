@@ -9,6 +9,7 @@ import models
 import uuid
 import Cookie
 import hashlib
+import logging
 from datetime import datetime
 from datetime import time
 from google.appengine.ext.webapp import template
@@ -62,7 +63,8 @@ class MainPage(webapp2.RequestHandler):
             user = models.user().get_by_id(user_hash)
 
             template_values = {'login':1,
-                               'email':user.country_name}
+                               'email':user.country_name,
+                               'point':user.port_point}
 
         path = os.path.join(os.path.dirname(__file__), './templates/header_menu.html')
         header_html = template.render(path,template_values)
@@ -89,15 +91,11 @@ class registration_page():
         res['airport'] = ''
         res['airline'] = ''
         return res
-    def setval_ap(self):
-        additionals = {}
-        return additionals
 
     def get(self):
         user = self.user_disp()
         res = self.setval(user)
-        additionals = self.setval_ap()
-        self.display(res,additionals)
+        self.display(res)
 
     def user_disp(self):
         client_id = self.request.cookies.get('clid', '')
@@ -108,29 +106,26 @@ class registration_page():
             user = models.user().get_by_id(user_hash)
         return user
 
-    def display(self,res,additionals):
+    def display(self,res):
         header_link = './templates/header_menu.html'
         user = self.user_disp()
 
         template_values = {'login':1,
-                            'email':user.country_name}
+                            'email':user.country_name,
+                            'point':user.port_point}
 
         path = os.path.join(os.path.dirname(__file__), header_link)
         header_html = template.render(path,template_values)
 
-        if self.request.get("mode") == 'u':
-            disp_link = res['disp_link_u']
-        else:
-            disp_link = res['disp_link']
+        disp_link = res['disp_link']
 
         template_values = {'sys_message':res['msg'],
                            'header':header_html,
                            'remode':res['rescd'],
                            'allcompanies':res['airline'],
                            'allports':res['airport'],
-                           'additionals':additionals,
                            'country_name':user.country_name,
-                           'origin_key': user.key.id}
+                           'origin_key': user.key.id()}
         path = os.path.join(os.path.dirname(__file__),disp_link)
         self.response.out.write(template.render(path, template_values))
 
@@ -156,23 +151,24 @@ class registration_page():
             for item in items:
                 if item["item"] == '':
                 #入力値チェック
-                    msg = item["item"]+"が入力されていません"
+                    msg = item["type"]+"が入力されていません"
                     code = 1
                     break
 
                 else:
                 #桁数確認
                     if item["lenc"] == "MT" and len(item["item"]) < item["len"]:
-                        msg =item["type"]+"は"+str(item["len"])+"以上にしてください"
+                        msg =item["type"]+"は"+str(item["len"])+"桁以上にしてください"
                         code = 1
 
                     elif item["lenc"] == "LT" and len(item["item"]) > item["len"]:
-                        msg =item["type"]+"は"+str(item["len"])+"以下にしてください"
+                        msg =item["type"]+"は"+str(item["len"])+"桁以下にしてください"
                         code = 1
 
                     elif item["lenc"] == "EQ" and len(item["item"]) <> item["len"]:
-                        msg =item["type"]+"は"+str(item["len"])+"にしてください"
+                        msg =item["type"]+"は"+str(item["len"])+"桁にしてください"
                         code = 1
+
 
                 #数字の扱い
 
@@ -248,7 +244,6 @@ class Airport(webapp2.RequestHandler,registration_page):
     def setval(self,user):
         res= {}
         res['disp_link'] = './templates/Airport.html'
-        res['disp_link_u'] = './templates/Airport_u.html'
         res['msg'] = '空港を登録してください'
         res['rescd'] = 2
         allports = models.airport.query().filter(models.airport.country_name == user.country_name)
@@ -256,6 +251,7 @@ class Airport(webapp2.RequestHandler,registration_page):
         res['airline'] = ''
 
         return res
+
     def post(self):
         if self.request.get("mode") == "u":
             items =[{"item":self.request.get("portname"),"type":"名称","kind":"空港","len":50,"lenc":"LT"},
@@ -269,49 +265,71 @@ class Airport(webapp2.RequestHandler,registration_page):
 
         valres = self.basic_validation(items)
 
+        user_hash = self.request.cookies.get('hash', '')
+        user = models.user().get_by_id(user_hash)
+
+        recd = 0
         if valres['code'] == 1:
             recd = valres['code']
             remsg = valres['msg']
-
         else:
-            if self.request.get("country_name") == "":
-                user_hash = self.request.cookies.get('hash', '')
-                user = models.user().get_by_id(user_hash)
-                country_name = user.country_name
-            else:
-                country_name = self.request.get("country_name")
+
+            equip = []
+            runway1 = models.runway()
+            runway1.number = 1
+            runway1.distance = 2000
+            runway1.degree = 0
+            runway1.root_pointX = 0
+            runway1.root_pointY = 0
+            runway1.initialize()
+            equip.append(runway1)
+
+            runway2 = models.runway()
+            runway2.number = 2
+            runway2.distance = 3000
+            runway2.degree = 0
+            runway2.root_pointX = 0
+            runway2.root_pointY = 0
+            runway2.initialize()
+            equip.append(runway2)
 
             arg = {'portname': self.request.get("portname"),
                    'portcode': self.request.get("portcode"),
                    'location': self.request.get("location"),
-                   'country_name':country_name,
-                   'origin_key': user_hash}
+                   'runway'  : equip,
+                   'origin_key':user.key,
+                   'maxpoint'  :user.port_point}
 
             if self.request.get("mode") == "u":
-                port_code = ''
-                port_code = self.request.get("portid")
+                oldpoint = 0
+                portid = int(self.request.get("portid"))
+                target_port = models.airport().get_by_id(portid)
+                oldpoint = target_port.portPoint
 
-                if port_code.isdigit():
-                    port_code = int(port_code)
+                remsg = "空港情報を更新しました"
+                rescd = target_port.update(arg)
+                portpoint = target_port.portPoint
+                respoint = portpoint - oldpoint
 
-                smsg = "空港情報を更新しました"
             else:
-                port_code = self.request.get("portcode")
-                smsg = "空港情報を登録しました"
-
-            target_port = models.airport().get_by_id(port_code)
-            rescd = target_port.create(arg)
+                portid = int(self.request.get("portcode"))
+                remsg = "空港情報を登録しました"
+                rescd = target_port.create(arg)
+                respoint = target_port.portPoint
 
             if rescd['code'] == 0:
+                user.port_point -= respoint
+                user.put()
                 target_port.put()
 
-                recd = rescd['code']
-                remsg = smsg
+            else:
+                recd  = rescd['code']
+                remsg = user.port_point
 
-        res = self.setval()
+        res = self.setval(user)
         res['rescd'] = recd
         res['msg'] = remsg
-        self.display(res,"")
+        self.display(res)
         return
 
 class Route(webapp2.RequestHandler,registration_page):
@@ -389,7 +407,7 @@ class Route(webapp2.RequestHandler,registration_page):
         res = self.setval()
         res['rescd'] = recd
         res['msg']   = remsg
-        self.display(res,"")
+        self.display(res)
 
         return
 
@@ -461,6 +479,7 @@ class User(webapp2.RequestHandler):
         new_user.email = uid
         new_user.password = password
         new_user.country_name = country_name
+        new_user.port_point = 100
         new_user.put()
 
         self.redirect('/')
@@ -492,7 +511,6 @@ class Signin(webapp2.RequestHandler):
         pr_user = models.user().get_by_id(user_key)
         if pr_user:
             if pr_user.password == passwd:
-
                 client_id = str(uuid.uuid4())
                 disp_name = pr_user.country_name
                 max_age = 60*120
@@ -582,6 +600,10 @@ class Airline_list(webapp2.RequestHandler):
 
         return res
 
+class Airport_Designer(webapp2.RequestHandler):
+    def get(self):
+        return
+
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/Airline', Airline),
                                ('/Airport', Airport),
@@ -590,4 +612,5 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/Signin', Signin),
                                ('/get_img',Get_image),
                                ('/port_list',Port_list),
-                               ('/airline_list',Airline_list)], debug=True)
+                               ('/airline_list',Airline_list),
+                               ('/port_designer',Airport_Designer)], debug=True)
