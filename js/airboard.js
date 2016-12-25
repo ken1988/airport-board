@@ -42,6 +42,11 @@
         $('#cover').html($(this).val());
     });
 
+    $('.apdez').on('click',function() {
+    	var portid = $(this).attr('id');
+    	window.open('/port_designer?id='+portid,'_blank','top=50,left=50,width=500,height=500,scrollbars=1,location=0,menubar=0,toolbar=0,status=1,directories=0,resizable=1');
+    });
+
     $('#country').change(function(){
     	$.getJSON("/port_list",{country:$(this).children('option:selected').val()}, function(data){
     		var jsonData = data,

@@ -208,11 +208,9 @@ class Airline(webapp2.RequestHandler,registration_page):
     def setval(self,user):
         res= {}
         res['disp_link'] = './templates/Airline.html'
-        res['disp_link_u'] = './templates/Airline_u.html'
         res['msg'] = '航空会社を登録してください'
         res['rescd'] = 2
-        all_lines = models.airline.query()
-
+        all_lines = models.airline.query().filter(models.airline.origin_country == user.country_name)
         res['airport'] = ''
         res['airline'] = all_lines
         return res
@@ -602,6 +600,11 @@ class Airline_list(webapp2.RequestHandler):
 
 class Airport_Designer(webapp2.RequestHandler):
     def get(self):
+
+        template_values = {'portid':self.request.get('id')}
+        path = os.path.join(os.path.dirname(__file__), './templates/apdesigner.html')
+        self.response.out.write(template.render(path, template_values))
+
         return
 
 app = webapp2.WSGIApplication([('/', MainPage),

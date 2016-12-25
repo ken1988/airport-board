@@ -57,7 +57,7 @@
 					{% for port in allports %}
 					<form method="post" action="/Airport" role="form" data-toggle="validator">
 					<tr>
-					<td></td>
+					<td>{{ port.portPoint }}</td>
 					<td><input type="text" name="portcode" id="portcode" class="form-control" value="{{ port.portcode }}" required="required"></td>
 					<td><input type="text" data-minlength="3" name="portname" id="portname" class="form-control" value="{{ port.portname }}" required="required"></td>
 					<td><input type="text" name="location" id="location" class="form-control" value="{{ port.location }}" required="required"></td>
@@ -67,14 +67,14 @@
 					<li>第{{ runway.number }}滑走路：{{ runway.distance }}m</li>
 					{% endfor %}
 					</ul>
-					<input type="button" value="空港デザイナ" class="btn btn-primary"></td>
-					<td>
+					</td>
+					<input type="button" value="空港デザイナ" id="{{ port.key.id }}" class="btn btn-primary apdez">
 					<input type="hidden" name="origin_country" value="{{ origin_key }}">
 					<input type="hidden" name="mode" value="u">
 					<input type="hidden" name="portid" id="portid" value="{{ port.key.id }}">
-					<input type="submit" class="btn btn-primary"></td>
-					</tr>
+					<input type="submit" class="btn btn-primary">
 					</form>
+					</tr>
 					{% endfor %}
 				</tbody>
 			</table>
@@ -127,5 +127,6 @@
 	<script src="../js/bootstrap-timepicker.js" type="text/javascript"></script>
 	<script src="../js/bootstrap-editable.js" type="text/javascript"></script>
 	<script src="../js/portDesigner.js" type="text/javascript"></script>
+	<script src="../js/airboard.js" type="text/javascript"></script>
 </body>
 </html>
