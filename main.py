@@ -137,7 +137,6 @@ class registration_page():
         return
 
     def delete(self):
-
         return
 
     def basic_validation(self,items):
@@ -168,7 +167,6 @@ class registration_page():
                     elif item["lenc"] == "EQ" and len(item["item"]) <> item["len"]:
                         msg =item["type"]+"は"+str(item["len"])+"桁にしてください"
                         code = 1
-
 
                 #数字の扱い
 
