@@ -132,6 +132,8 @@ class air_route(ndb.Model):
     Plane = ndb.StringProperty()
     Dept_time = ndb.TimeProperty()
     Arrv_time = ndb.TimeProperty()
+    origin_country = ndb.StringProperty()
+    origin_key     = ndb.KeyProperty(kind='user')
 
     def create(self,arg):
         try:

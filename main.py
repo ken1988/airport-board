@@ -353,6 +353,9 @@ class Route(webapp2.RequestHandler,registration_page):
         valres = self.basic_validation(items)
         valres2 = self.validate()
 
+        user_hash = self.request.cookies.get('hash', '')
+        user = models.user().get_by_id(user_hash)
+
         if valres['code'] * valres2['code'] == 1:
             recd = valres['code']
             remsg = valres['msg']
@@ -376,7 +379,8 @@ class Route(webapp2.RequestHandler,registration_page):
                         'Numbers'  : self.request.get("frec"),
                         'Plane'    : self.request.get("plane"),
                         'dept_time': times['dept_time'],
-                        'arrv_time': times['arrv_time']}
+                        'arrv_time': times['arrv_time'],
+                        'origin_key':user.key}
 
                 newroute = models.air_route(id = code)
                 rescd = newroute.create(arg)
