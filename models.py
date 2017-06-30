@@ -13,8 +13,8 @@ class runway(ndb.Model):
     runwaypoint = ndb.IntegerProperty()
     root_pointX = ndb.IntegerProperty()
     root_pointY = ndb.IntegerProperty()
-    def initialize(self):
 
+    def Calc_point(self):
         if self.distance >= 4000:
             self.runwaypoint = 8
 
@@ -32,6 +32,10 @@ class runway(ndb.Model):
 
         return self.runwaypoint
 
+    def initialize(self):
+        self.runwaypoint = 0
+        return self.runwaypoint
+
 class airport(ndb.Model):
     portname    = ndb.StringProperty()
     portcode    = ndb.StringProperty()
@@ -45,21 +49,26 @@ class airport(ndb.Model):
     portPoint   = ndb.IntegerProperty()
 
     def create(self,arg):
+        rescd = {}
         try:
             self.portname = arg['portname']
             self.portcode = arg['portcode']
             self.location = arg['location']
             self.origin_key=arg['origin_key']
-            self.portEquip  = arg['runway']
+
+            for equip in arg['runway']:
+                logging.info(equip)
+                self.portEquip  = equip
+
             self.portPoint  = arg['portpoint']
             self.country_name = arg['country_name']
-
             self.calc_point(arg['maxpoint'])
 
             rescd = {'code':0,'msg':'登録成功'}
 
-        except ValueError:
+        except Exception as e:
             rescd = {'code':1,'msg':'登録時にエラー発生'}
+            logging.error(e)
 
         finally:
             return rescd

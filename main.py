@@ -15,6 +15,7 @@ from datetime import time
 from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb
 import json
+from inspect import iscode
 
 class MainPage(webapp2.RequestHandler):
     def initial_set(self,depart_port):
@@ -50,6 +51,7 @@ class MainPage(webapp2.RequestHandler):
                            'allroutes':res["allroutes"],
                            'allroutes_ar':res['allroutes_ar'],
                            'countries':res['countries']}
+
         path = os.path.join(os.path.dirname(__file__), './templates/index.html')
         self.response.out.write(template.render(path, template_values))
 
@@ -93,9 +95,39 @@ class registration_page():
         return res
 
     def get(self):
-        user = self.user_disp()
-        res = self.setval(user)
-        self.display(res)
+        if self.request.get("data-type") == 'json':
+            self.prep_json()
+            self.get_json()
+        else:
+            user = self.user_disp()
+            res = self.setval(user)
+            self.display(res)
+
+    def prep_json(self):
+        return
+
+    def get_json(self):
+        if self.request.get("mode") == 'uni':
+            resp_key = ndb.Key()
+            resp_item = resp_key.get()
+            resp_dict = resp_item.to_dict()
+        else:
+            t_country = self.request.get('country')
+            resp_dict = self.get_allname(t_country)
+
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(json.dumps(resp_dict))
+        return
+
+    def get_allname(self,t_country):
+        all_items = ndb.query(models.user.country_name == t_country)
+        res = []
+
+        for port in all_items:
+            portname = port.portname.encode('utf_8')
+            res.append(portname)
+
+        return res
 
     def user_disp(self):
         client_id = self.request.cookies.get('clid', '')
@@ -271,23 +303,15 @@ class Airport(webapp2.RequestHandler,registration_page):
         else:
 
             equip = []
-            runway1 = models.runway()
-            runway1.number = 1
-            runway1.distance = 2000
-            runway1.degree = 0
-            runway1.root_pointX = 0
-            runway1.root_pointY = 0
-            runway1.initialize()
-            equip.append(runway1)
+            for num in xrange(1,5):
 
-            runway2 = models.runway()
-            runway2.number = 2
-            runway2.distance = 3000
-            runway2.degree = 0
-            runway2.root_pointX = 0
-            runway2.root_pointY = 0
-            runway2.initialize()
-            equip.append(runway2)
+                runway = {'number'     : num,
+                          'distance'   :0,
+                          'degree'     :0,
+                          'root_pointX':0,
+                          'root_pointY':0,
+                          'runwaypoint':0}
+                equip.append(runway)
 
             arg = {'portname': self.request.get("portname"),
                    'portcode': self.request.get("portcode"),
@@ -308,8 +332,8 @@ class Airport(webapp2.RequestHandler,registration_page):
                 respoint = portpoint - oldpoint
 
             else:
-                portid = int(self.request.get("portcode"))
                 remsg = "空港情報を登録しました"
+                target_port = models.airport()
                 rescd = target_port.create(arg)
                 respoint = target_port.portPoint
 
@@ -602,12 +626,18 @@ class Airline_list(webapp2.RequestHandler):
 
 class Airport_Designer(webapp2.RequestHandler):
     def get(self):
+        port_id = self.request.get('id')
 
-        template_values = {'portid':self.request.get('id')}
+        if port_id.isdigit():
+            port = models.airport.get_by_id(int(port_id))
+        else:
+            port = models.airport.get_by_id(port_id)
+
+        template_values = {'airport':port,
+                           'port_id':port_id}
+
         path = os.path.join(os.path.dirname(__file__), './templates/apdesigner.html')
         self.response.out.write(template.render(path, template_values))
-
-        return
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/Airline', Airline),

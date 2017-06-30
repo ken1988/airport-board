@@ -1,24 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="">
-<meta name="author" content="">
-<title>Airport Designer</title>
-
-
-<!-- Bootstrap core CSS -->
-<link href="../css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Custom styles for this template -->
-<link href="../css/detail_setting.css" rel="stylesheet">
-
-
-</head>
-<body>
-<h1>{{ portid }}</h1>
-
-</body>
-</html>
+<h2>{{ airport.portname }}</h2>
+<div id="toolbox">
+<ul>
+{% for equip in airport.portEquip %}
+<li class="Runway" id="RW{{ equip.number }}" data-degree="{{ equip.degree }}"
+data-distance="{{ equip.distance }}" data-pointx="{{ equip.root_pointX }}"
+ data-pointy="{{ equip.root_pointY }}">第{{ equip.number }}滑走路 {{ equip.distance }}m級
+</li>
+{% endfor %}
+</ul>
+</div>
+<canvas id="port_map" width="300" height="300"></canvas>
