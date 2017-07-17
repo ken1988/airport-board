@@ -102,12 +102,12 @@
   	  /* 2Dコンテキスト */
   	  var ctx = canvas.getContext('2d');
   	  /* 四角を描く */
-  	  ctx.strokeStyle = "black";
-  	  ctx.fillStyle = "black";
+  	  ctx.strokeStyle = "gray";
+  	  ctx.fillStyle = "gray";
 
   	  ctx.rotate( degree * Math.PI / 180 );
   	  ctx.strokeRect(px, py, dist, 10);
-  	  ctx.fill();
+  	  ctx.fillRect(px, py, dist, 10);
   	  ctx.rotate( -degree * Math.PI / 180 );
     }
 

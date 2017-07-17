@@ -556,49 +556,54 @@ class Signin(webapp2.RequestHandler):
             self.response.headers.add_header('Set-Cookie', myCookie.output(header=""))
         return
 
-class Port_list(webapp2.RequestHandler):
+class Json_list():
+    def get_uni(self,t_kind,t_code):
+        t_key = ndb.Key(t_kind,t_code)
+        t_obj = t_key.get()
+
+        return  t_obj.to_dict()
+
+    def get_all(self,t_kind,t_country):
+        t_objects = ndb.Query(kind = t_kind).filter(models.user.country_name == t_country)
+        return t_objects
+
+class Port_list(webapp2.RequestHandler,Json_list):
     def get(self):
         if self.request.get("mode") == 'uni':
             port_code = ''
             port_code = self.request.get('port_id')
-
-            if port_code.isdigit():
-                port = models.airport.get_by_id(int(port_code))
-            else:
-                port = models.airport.get_by_id(port_code)
-
-            report = port.to_dict()
-
-            #ヘッダー情報
-            self.response.headers['Content-Type'] = 'application/json'
-            self.response.out.write(json.dumps(report))
-
+            report = self.get_uni("airport", port_code)
         else:
             t_country = self.request.get('country')
-            res = self.get_ports(t_country)
+            report = self.get_ports(t_country)
 
-            #ヘッダー情報
-            self.response.headers['Content-Type'] = 'application/json'
-            self.response.out.write(json.dumps(res))
-            return
+        #ヘッダー情報
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(json.dumps(report))
+        return
 
     def get_ports(self, t_country):
-        allports = models.airport.query(models.user.country_name == t_country)
+        allports = self.get_all("airport", t_country)
         res = []
+        res_port = {}
 
         for port in allports:
-            portname = port.portname.encode('utf_8')
-            res.append(portname)
+            res_port ={"portkey":port.key.id(),
+                       "portpoint":port.portPoint,
+                       "portcode":port.portcode.encode('utf_8'),
+                       "portname":port.portname.encode('utf_8'),
+                       "location":port.location.encode('utf_8')}
+
+            res.append(res_port)
 
         return res
 
-class Airline_list(webapp2.RequestHandler):
+class Airline_list(webapp2.RequestHandler,Json_list):
     def get(self):
         if self.request.get("mode") == 'uni':
             airline_code = ''
             airline_code = self.request.get('company_id')
-            airline = models.airline.get_by_id(airline_code)
-            report = airline.to_dict()
+            report = self.get_uni("airline", airline_code)
             report.pop('company_logo')
 
             #ヘッダー情報
@@ -624,6 +629,29 @@ class Airline_list(webapp2.RequestHandler):
 
         return res
 
+class AirRoute_list(webapp2.RequestHandler,Json_list):
+    def get(self):
+        t_country = self.request.get('country')
+        report = self.get_routes(t_country)
+
+        #ヘッダー情報
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(json.dumps(report))
+        return
+
+    def get_routes(self,t_country):
+        allroutes = self.get_all("air_route", t_country)
+        res = []
+
+        for air_route in allroutes:
+            route_code = air_route.route_code.encode('utf-8')
+            res.append(route_code)
+
+        return res
+
+    def post(self):
+        return
+
 class Airport_Designer(webapp2.RequestHandler):
     def get(self):
         port_id = self.request.get('id')
@@ -648,4 +676,5 @@ app = webapp2.WSGIApplication([('/', MainPage),
                                ('/get_img',Get_image),
                                ('/port_list',Port_list),
                                ('/airline_list',Airline_list),
+                               ('/route_list',AirRoute_list),
                                ('/port_designer',Airport_Designer)], debug=True)

@@ -7,10 +7,8 @@
 <meta name="description" content="">
 <meta name="author" content="">
 
-<title>メインページ</title>
-
 <!-- Bootstrap core CSS -->
-<link href="../css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/bootstrap.css" rel="stylesheet">
 
 <!-- Custom styles for this template -->
 <link href="../css/detail_setting.css" rel="stylesheet">
@@ -23,8 +21,19 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+<link href="../css/bootstrap-editable.css" rel="stylesheet">
+
+<!-- Riot.js -->
+<script type="riot/tag" src="../riots/sns-count-facebook.tag"></script>
+<script src="../js/riot+compiler.js" type="text/javascript"></script>
+<!-- Riot.js -->
+
 <script src="../js/sugar.js" type="text/javascript"></script>
 <script>
+
+<title>メインページ</title>
+
 function clock(){
     var nowFormated = new Sugar.Date.create('today');
     document.getElementById('clock-01').innerHTML = nowFormated;

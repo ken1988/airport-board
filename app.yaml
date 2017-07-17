@@ -25,6 +25,9 @@ handlers:
 - url: /fonts
   static_dir: fonts
 
+- url: /riots
+  static_dir: riots
+
 - url: /js
   static_dir: js
 
